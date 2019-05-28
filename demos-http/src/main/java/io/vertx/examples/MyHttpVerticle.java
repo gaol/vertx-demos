@@ -1,10 +1,10 @@
 package io.vertx.examples;
 
-import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.web.Router;
+import io.vertx.reactivex.core.AbstractVerticle;
+import io.vertx.reactivex.ext.web.Router;
 
 public class MyHttpVerticle extends AbstractVerticle {
 
@@ -19,16 +19,16 @@ public class MyHttpVerticle extends AbstractVerticle {
         city = "bj";
       }
       final String theCity = city;
-      vertx.eventBus().<JsonObject>send("city-house-price", theCity, reply -> {
-        if (reply.failed()) {
-          logger.error("Failed to query the house price.", reply.cause());
-          rc.response().setStatusCode(400).end(reply.cause().getMessage());
-        } else {
-          JsonObject content = reply.result().body();
-          logger.info(String.format("\nGot house price of city: %s is: %s", theCity, content.toString()));
-          rc.response().end(content.toBuffer());
-        }
-      });
+      vertx.eventBus()
+        .<JsonObject>rxSend("city-house-price", city)
+        .map(m -> m.body().toBuffer())
+        .subscribe(s -> {
+            logger.info(String.format("\nHouse price of city: %s is: %s", theCity, s));
+          rc.response().getDelegate().end(s);
+        }, e -> {
+          logger.error("Failed to query the house price.", e);
+          rc.response().setStatusCode(400).end(e.getMessage());
+        });
     });
 
     vertx.createHttpServer()
