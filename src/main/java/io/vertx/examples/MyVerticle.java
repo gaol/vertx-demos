@@ -32,7 +32,7 @@ public class MyVerticle extends AbstractVerticle {
                 if (arr.succeeded()) {
                   JsonObject content = cityHousePrice(arr.result());
                   logger.info(String.format("Got house price of city: %s is: %s", theCity, content.toString()));
-                  rc.response().end(content.toBuffer());
+                  rc.response().putHeader("Content-Type", "application/json").end(content.toBuffer());
                 } else {
                   logger.error("Failed to get house price of city: " + theCity, arr.cause());
                   rc.response().setStatusCode(400).end(arr.cause().getMessage());
