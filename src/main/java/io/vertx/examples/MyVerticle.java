@@ -1,14 +1,14 @@
 package io.vertx.examples;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.client.HttpResponse;
-import io.vertx.ext.web.client.WebClient;
+import io.vertx.reactivex.core.AbstractVerticle;
+import io.vertx.reactivex.core.buffer.Buffer;
+import io.vertx.reactivex.ext.web.Router;
+import io.vertx.reactivex.ext.web.client.HttpResponse;
+import io.vertx.reactivex.ext.web.client.WebClient;
 
 public class MyVerticle extends AbstractVerticle {
 
@@ -17,34 +17,25 @@ public class MyVerticle extends AbstractVerticle {
   @Override
   public void start() {
     Router router = Router.router(vertx);
-    router.get("/").handler(rc -> {
-      String city = rc.request().getParam("city");
-      if (city == null) {
-        city = "bj";
-      }
-      final String theCity = city;
-
-      WebClient webClient = WebClient.create(vertx);
-      webClient.get(443, String.format("%s.lianjia.com", theCity), "/").ssl(true).send(ar -> {
-        if (ar.succeeded()) {
-          String regionId = cityRegionId(ar.result());
-          webClient.get(443, String.format("%s.lianjia.com", theCity),
-              String.format("/fangjia/priceTrend/?region=city&region_id=%s", regionId)).ssl(true).send(arr -> {
-                if (arr.succeeded()) {
-                  JsonObject content = cityHousePrice(arr.result());
-                  logger.info(String.format("Got house price of city: %s is: %s", theCity, content.toString()));
-                  rc.response().end(content.toBuffer());
-                } else {
-                  logger.error("Failed to get house price of city: " + theCity, arr.cause());
-                  rc.response().setStatusCode(400).end(arr.cause().getMessage());
-                }
-              });
-        } else {
-          logger.error("Failed to get regionId of city: " + theCity, ar.cause());
-          rc.response().setStatusCode(400).end(ar.cause().getMessage());
+    router.get("/")
+      .handler(rc -> {
+        String city = rc.request().getParam("city");
+        if (city == null) {
+          city = "bj";
         }
+        final String theCity = city;
+        WebClient webClient = WebClient.create(vertx);
+        webClient
+          .get(443, String.format("%s.lianjia.com", theCity), "/")
+          .ssl(true).rxSend()
+          .map(MyVerticle::cityRegionId)
+          .flatMap(regionId -> webClient.get(443, String.format("%s.lianjia.com", theCity),
+                String.format("/fangjia/priceTrend/?region=city&region_id=%s", regionId)).ssl(true).rxSend())
+          .map(MyVerticle::cityHousePrice)
+          .map(JsonObject::toBuffer)
+          // .doOnError(err -> logger.error("Failed to get the price", err))
+          .subscribe(rc.response().getDelegate()::end, rc::fail);
       });
-    });
 
     vertx.createHttpServer()
         .requestHandler(router)
