@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.vertx.demos</groupId>
+  <artifactId>vertx-demos-app</artifactId>
+  <version>0.0.1</version>
+
+  <packaging>pom</packaging>
+
+  <properties>
+    <vertx.version>3.7.1</vertx.version>
+    <vertx-maven-plugin.version>1.0.18</vertx-maven-plugin.version>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+          <groupId>io.vertx</groupId>
+          <artifactId>vertx-stack-depchain</artifactId>
+          <version>${vertx.version}</version>
+          <type>pom</type>
+          <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <modules>
+    <module>demos-http</module>
+    <module>demos-service</module>
+  </modules>
+</project>
