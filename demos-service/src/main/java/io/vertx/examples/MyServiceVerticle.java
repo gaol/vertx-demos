@@ -1,4 +1,4 @@
-package io.vertx.examples.openshift;
+package io.vertx.examples;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.buffer.Buffer;

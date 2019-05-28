@@ -14,7 +14,7 @@
   <artifactId>vertx-demos-http</artifactId>
 
   <properties>
-    <vertx.verticle>io.vertx.examples.openshift.MyHttpVerticle</vertx.verticle>
+    <vertx.verticle>io.vertx.examples.MyHttpVerticle</vertx.verticle>
   </properties>
 
   <dependencies>

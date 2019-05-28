@@ -14,7 +14,7 @@
   <artifactId>vertx-demos-service</artifactId>
 
   <properties>
-    <vertx.verticle>io.vertx.examples.openshift.MyServiceVerticle</vertx.verticle>
+    <vertx.verticle>io.vertx.examples.MyServiceVerticle</vertx.verticle>
   </properties>
 
   <dependencies>
