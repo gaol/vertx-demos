@@ -6,6 +6,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 
@@ -17,13 +18,10 @@ public class MyServiceVerticle extends AbstractVerticle {
   public void start() {
     vertx.eventBus().<String>consumer("city-house-price", msg -> {
       WebClient webClient = WebClient.create(vertx);
-      webClient.get(443, String.format("%s.lianjia.com", msg.body()), "/")
-        .ssl(true)
+      cityHouseRegionIdRequest(webClient, msg.body())
         .send(ar -> {
           if (ar.succeeded()) {
-            String regionId = cityRegionId(ar.result());
-            webClient.get(443, String.format("%s.lianjia.com", msg.body()), String.format("/fangjia/priceTrend/?region=city&region_id=%s", regionId))
-              .ssl(true)
+            cityHousePriceRequest(webClient, msg.body(), cityRegionId(ar.result()))
               .send(arr -> {
                 if (arr.succeeded()) {
                   logger.info(String.format("\nChecking house price of city: %s", msg.body()));
@@ -39,6 +37,15 @@ public class MyServiceVerticle extends AbstractVerticle {
           }
         });
     });
+  }
+
+  private static HttpRequest<Buffer> cityHouseRegionIdRequest(WebClient webClient, String city) {
+    return webClient.get(443, String.format("%s.lianjia.com", city), "/").ssl(true);
+  }
+
+  private static HttpRequest<Buffer> cityHousePriceRequest(WebClient webClient, String city, String regionId) {
+    return webClient.get(443, String.format("%s.lianjia.com", city),
+        String.format("/fangjia/priceTrend/?region=city&region_id=%s", regionId)).ssl(true);
   }
 
   private static JsonObject cityHousePrice(HttpResponse<Buffer> resp) {
