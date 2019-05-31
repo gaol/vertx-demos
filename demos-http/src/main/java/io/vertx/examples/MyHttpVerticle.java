@@ -24,7 +24,7 @@ public class MyHttpVerticle extends AbstractVerticle {
         .map(m -> m.body().toBuffer())
         .subscribe(s -> {
             logger.info(String.format("\nHouse price of city: %s is: %s", theCity, s));
-          rc.response().getDelegate().end(s);
+            rc.response().getDelegate().putHeader("Content-Type", "application/json").end(s);
         }, e -> {
           logger.error("Failed to query the house price.", e);
           rc.response().setStatusCode(400).end(e.getMessage());

@@ -28,7 +28,7 @@ public class MyServiceVerticle extends AbstractVerticle {
         .flatMap(regionId -> cityHousePriceRequest(webClient, msg.body(), regionId).rxSend())
         .map(MyServiceVerticle::cityHousePrice)
         .subscribe(s -> {
-          logger.info(String.format("\nChecking house price of city: %s", s));
+          logger.info(String.format("\nChecking house price of city %s: %s", city, s));
           msg.reply(s);
         }, e -> {
             logger.error("Failed to get regionId of city: " + city, e);
