@@ -26,7 +26,7 @@ public class MyHttpVerticle extends AbstractVerticle {
         } else {
           JsonObject content = reply.result().body();
           logger.info(String.format("\nGot house price of city: %s is: %s", theCity, content.toString()));
-          rc.response().end(content.toBuffer());
+          rc.response().putHeader("Content-Type", "application/json").end(content.toBuffer());
         }
       });
     });
