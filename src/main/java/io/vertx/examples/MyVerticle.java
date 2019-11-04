@@ -11,6 +11,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.handler.BodyHandler;
 
 public class MyVerticle extends AbstractVerticle {
 
@@ -20,7 +21,16 @@ public class MyVerticle extends AbstractVerticle {
   public void start() {
     Router router = Router.router(vertx);
     router.get("/").handler(this::handleRequest);
+    router.post("/reproducer/rest/product/post").handler(BodyHandler.create());
+    router.post("/reproducer/rest/product/post").handler(this::test);
     vertx.createHttpServer().requestHandler(router).listen(8080);
+  }
+
+  private void test(RoutingContext rc) {
+    JsonObject json = rc.getBodyAsJson();
+    json.put("result", "OK, got you!");
+    System.err.println("Got request: " + rc.request().headers());
+    rc.response().putHeader("Content-Type", "application/json").end(json.toBuffer());
   }
 
   private void handleRequest(RoutingContext rc) {
