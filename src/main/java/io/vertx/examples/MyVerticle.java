@@ -1,90 +1,52 @@
 package io.vertx.examples;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.HttpRequest;
-import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.client.predicate.ResponsePredicate;
+import io.vertx.ext.web.codec.BodyCodec;
 
 public class MyVerticle extends AbstractVerticle {
 
-  private final static Logger logger = LoggerFactory.getLogger(MyVerticle.class);
+  HttpRequest<JsonObject> request;
+
+  private static int i = 0;
+
+  private int index;
 
   @Override
   public void start() {
-    Router router = Router.router(vertx);
-    router.get("/").handler(this::handleRequest);
-    router.post("/reproducer/rest/product/post").handler(BodyHandler.create());
-    router.post("/reproducer/rest/product/post").handler(this::test);
-    vertx.createHttpServer().requestHandler(router).listen(8080);
+    index = ++i;
+    System.out.println("Instance of: " + index + " Started at thread: @ " + Thread.currentThread());
+    this.request = WebClient.create(vertx)
+            .get(443, "icanhazdadjoke.com", "/")
+            .ssl(true)
+            .putHeader("Accept", "application/json")
+            .as(BodyCodec.jsonObject())
+            .expect(ResponsePredicate.SC_OK)
+    ;
+
+    vertx.setPeriodic(3000, id -> fetchJoke());
   }
 
-  private void test(RoutingContext rc) {
-    JsonObject json = rc.getBodyAsJson();
-    json.put("result", "OK, got you!");
-    System.err.println("Got request: " + rc.request().headers());
-    rc.response().putHeader("Content-Type", "application/json").end(json.toBuffer());
-  }
-
-  private void handleRequest(RoutingContext rc) {
-    String city = rc.request().getParam("city");
-    if (city == null) {
-      city = "bj";
-    }
-    final String theCity = city;
-    WebClient webClient = WebClient.create(vertx);
-    cityHouseRegionIdRequest(webClient, theCity).send(ar -> {
-      if (ar.succeeded()) {
-        String regionId = cityRegionId(ar.result());
-        cityHousePriceRequest(webClient, theCity, regionId).send(arr -> {
-          if (arr.succeeded()) {
-            JsonObject content = cityHousePrice(arr.result());
-            logger.info(String.format("Got house price of city: %s is: %s", theCity, content.toString()));
-            rc.response().putHeader("Content-Type", "application/json").end(content.toBuffer());
-          } else {
-            logger.error("Failed to get house price of city: " + theCity, arr.cause());
-            rc.response().setStatusCode(400).end(arr.cause().getMessage());
-          }
-        });
-      } else {
-        logger.error("Failed to get regionId of city: " + theCity, ar.cause());
-        rc.response().setStatusCode(400).end(ar.cause().getMessage());
+  private void fetchJoke() {
+    System.out.println("Instance of: " + index + " Fetching Joke at thread: @ " + Thread.currentThread());
+    request.send(asyncResult -> {
+      System.out.println("Instance of: " + index + " Fetched Joke at thread: @ " + Thread.currentThread());
+      if (asyncResult.succeeded()) {
+        System.out.println(asyncResult.result().body().getString("joke")); // (7)
+        System.out.println();
       }
     });
   }
 
-  private static HttpRequest<Buffer> cityHouseRegionIdRequest(WebClient webClient, String city) {
-    return webClient.get(443, String.format("%s.lianjia.com", city), "/").ssl(true);
-  }
-
-  private static HttpRequest<Buffer> cityHousePriceRequest(WebClient webClient, String city, String regionId) {
-    return webClient.get(443, String.format("%s.lianjia.com", city),
-        String.format("/fangjia/priceTrend/?region=city&region_id=%s", regionId)).ssl(true);
-  }
-
-  private static JsonObject cityHousePrice(HttpResponse<Buffer> resp) {
-    JsonArray ja = resp.bodyAsJsonObject().getJsonObject("currentLevel").getJsonObject("dealPrice")
-        .getJsonArray("total");
-    long average = Math.round(ja.stream().mapToInt(ln -> (Integer) ln).average().orElse(0.0d));
-    int latest = ja.stream().mapToInt(ln -> (Integer) ln).skip(ja.size() - 1).findFirst().orElse(0);
-    return new JsonObject().put("Average", average + " CNY/SQM").put("Latest", latest + " CNY/SQM");
-  }
-
-  private static String cityRegionId(HttpResponse<Buffer> resp) {
-    String[] lines = resp.body().toString().split("\n");
-    for (String line : lines) {
-      if (line.trim().startsWith("ljweb_cid:")) {
-        return line.split("'")[1];
-      }
-    }
-    throw new RuntimeException("Cannot get regionId");
+  public static void main(String[] args) {
+    Vertx vertx = Vertx.vertx();
+    DeploymentOptions deployOptions = new DeploymentOptions().setInstances(5);
+    vertx.deployVerticle(MyVerticle.class.getName(), deployOptions);
   }
 
 }

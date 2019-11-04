@@ -5,12 +5,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.vertx.demos</groupId>
-  <artifactId>vertx-demos</artifactId>
+  <artifactId>vertx-demos-webclient-fetchingjoke</artifactId>
   <version>0.0.1</version>
 
   <properties>
     <vertx.verticle>io.vertx.examples.MyVerticle</vertx.verticle>
-    <vertx.version>3.7.1</vertx.version>
+    <vertx.version>3.8.3</vertx.version>
     <vertx-maven-plugin.version>1.0.18</vertx-maven-plugin.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -61,6 +61,14 @@
         </executions>
         <configuration>
           <redeploy>true</redeploy>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.5.0</version>
+        <configuration>
+          <mainClass>${vertx.verticle}</mainClass>
         </configuration>
       </plugin>
     </plugins>
