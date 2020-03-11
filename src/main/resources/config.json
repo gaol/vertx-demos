@@ -1,0 +1,18 @@
+{
+  "images": [
+    {
+      "name": "shadowsocks",
+      "description": "Shadowsocks used to set up a Sock vpn and proxy.\n Usage: docker run --name ${local_name} -e PASSWORD=${password} -e METHOD=$method -p${port}:8388 -p${port}:8388/udp -d shadowsocks/shadowsocks-libev",
+      "image": "shadowsocks/shadowsocks-libev",
+      "image-tag": "latest",
+      "docker-hub": "docker.io"
+    },
+    {
+      "name": "ffmpeg",
+      "description": "Using the command: \"docker run --rm -v `pwd`:/tmp/workdir jrottenberg/ffmpeg $*\" for the multimedia files convertion",
+      "image": "jrottenberg/ffmpeg",
+      "image-tag": "latest",
+      "docker-hub": "docker.io"
+    }
+  ]
+}

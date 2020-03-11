@@ -5,12 +5,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.vertx.demos</groupId>
-  <artifactId>vertx-demos</artifactId>
+  <artifactId>vertx-demos-http2</artifactId>
   <version>0.0.1</version>
 
   <properties>
-    <vertx.verticle>io.vertx.examples.MyVerticle</vertx.verticle>
-    <vertx.version>3.7.1</vertx.version>
+    <vertx.verticle>io.vertx.demos.Http2Verticle</vertx.verticle>
+    <vertx.version>4.0.0-SNAPSHOT</vertx.version>
     <vertx-maven-plugin.version>1.0.18</vertx-maven-plugin.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -21,7 +21,7 @@
     <dependencies>
       <dependency>
           <groupId>io.vertx</groupId>
-          <artifactId>vertx-stack-depchain</artifactId>
+          <artifactId>vertx-dependencies</artifactId>
           <version>${vertx.version}</version>
           <type>pom</type>
           <scope>import</scope>
@@ -41,6 +41,15 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-mail-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-junit5</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
