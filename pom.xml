@@ -5,13 +5,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.vertx.demos</groupId>
-  <artifactId>vertx-demos-app</artifactId>
+  <artifactId>vertx-demos-mail</artifactId>
   <version>0.0.1</version>
 
   <packaging>pom</packaging>
 
   <properties>
-    <vertx.version>3.7.1</vertx.version>
+    <vertx.version>4.0.0-SNAPSHOT</vertx.version>
     <vertx-maven-plugin.version>1.0.18</vertx-maven-plugin.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -29,8 +29,10 @@
     </dependencies>
   </dependencyManagement>
 
-  <modules>
-    <module>demos-http</module>
-    <module>demos-service</module>
-  </modules>
+  <dependencies>
+    <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-mail-client</artifactId>
+    </dependency>
+  </dependencies>
 </project>
