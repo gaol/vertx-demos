@@ -11,7 +11,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <vertx.version>4.0.0-SNAPSHOT</vertx.version>
+    <vertx.version>4.0.1-SNAPSHOT</vertx.version>
     <vertx-maven-plugin.version>1.0.18</vertx-maven-plugin.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>

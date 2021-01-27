@@ -48,7 +48,10 @@ public class SendMailVerticle extends AbstractVerticle {
       ;
       logger.info("Send Email With Subject: " + message.getSubject());
       final Thread t1 = Thread.currentThread();
+      logger.info("Current Context outside of mailClient.sentMail(): " + Vertx.currentContext());
+      // HERE IS DuplicatedContext with new connection pool.
       mailClient.sendMail(message, r -> {
+        logger.info("Current Context inside of mailClient.sentMail(): " + Vertx.currentContext());
         Thread t2 = Thread.currentThread();
         logger.info("t1: " + t1 + ", t2: " + t2);
         if (!t1.equals(t2)) {
@@ -65,7 +68,7 @@ public class SendMailVerticle extends AbstractVerticle {
         }
       });
     });
-    vertx.setTimer(2000, l -> checkClosed(1000, start));
+//    vertx.setTimer(2000, l -> checkClosed(1000, start));
 
   }
 
