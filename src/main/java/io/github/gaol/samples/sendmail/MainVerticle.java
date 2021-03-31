@@ -1,12 +1,9 @@
 package io.github.gaol.samples.sendmail;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Context;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mail.MailMessage;
 import io.vertx.ext.web.Router;
@@ -19,13 +16,10 @@ public class MainVerticle extends AbstractVerticle {
   private final static Logger logger = Logger.getLogger("MainVerticle");
 
   private Router router;
-  private static int idx;
-  private int i;
   private MailClientVerticle mailClientVerticle;
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
-    i = ++idx;
     router = Router.router(vertx);
     router.route("/sendmail").handler(this::sendmail);
     router.route("/sendmailb").handler(this::sendmailb);
@@ -33,7 +27,6 @@ public class MainVerticle extends AbstractVerticle {
     vertx.deployVerticle(mailClientVerticle);
     vertx.deployVerticle(SendMailVerticle.class, new DeploymentOptions().setInstances(8), did -> {
       if (did.succeeded()) {
-        logger.info("Deployed : " + did.result());
         vertx.createHttpServer()
           .requestHandler(router)
           .listen(8888, http -> {
@@ -52,34 +45,39 @@ public class MainVerticle extends AbstractVerticle {
   }
 
   private void sendmail(RoutingContext ctx) {
+    if ("1".equals(ctx.request().getParam("reset"))) {
+      SendMailVerticle.clearStatistics();
+      ctx.end("statistics reset");
+      return;
+    }
     JsonObject m = new JsonObject()
-      .put("subject", ctx.request().getParam("subject") + ", from main verticle: " + i)
+      .put("total", ctx.request().getParam("total"))
+      .put("subject", ctx.request().getParam("subject"))
       .put("content", ctx.request().getParam("content"));
     vertx.eventBus().send("mail.sent", m);
     ctx.end("Sent!");
   }
 
   private void sendmailb(RoutingContext ctx) {
+    if ("1".equals(ctx.request().getParam("reset"))) {
+      SendMailVerticle.clearStatistics();
+      ctx.end("statistics reset");
+      return;
+    }
     MailMessage message = new MailMessage();
     message
       .setText(ctx.request().getParam("content"))
       .setFrom("testa@localtest.tld")
       .setTo("testb@localtest.tld")
-      .setSubject(ctx.request().getParam("subject") + " in thread: " + Thread.currentThread())
+      .setSubject(ctx.request().getParam("subject"))
     ;
-    logger.info("Will send in context: " + context);
-    logger.info("Send Email With Subject: " + message.getSubject());
     final Thread t1 = Thread.currentThread();
     mailClientVerticle.mailClient.sendMail(message).onComplete(mr -> {
-      ctx.end("Sent B !");
       Thread t2 = Thread.currentThread();
       logger.info("t1: " + t1 + ", t2: " + t2);
       if (!t1.equals(t2)) {
-        logger.info("Current Context Is Wrong: " + i);
-        throw new IllegalStateException("context wrong !!!!!!!!!!!!!!!!!!!!!!!!");
+        throw new IllegalStateException("context wrong !");
       }
-      logger.info("event loop of context 1: " + ((ContextInternal)context).nettyEventLoop() + ", context: " + context);
-      logger.info("event loop of context 2: " + ((ContextInternal)Vertx.currentContext()).nettyEventLoop() + ", context: " + Vertx.currentContext());
       if (mr.succeeded()) {
         logger.info("Sent in context: " + Vertx.currentContext());
       } else {
@@ -87,6 +85,7 @@ public class MainVerticle extends AbstractVerticle {
         mr.cause().printStackTrace();
       }
     });
+    ctx.end("Send B !");
   }
 
   @Override
@@ -95,6 +94,7 @@ public class MainVerticle extends AbstractVerticle {
   }
 
   public static void main(String[] args) {
+    System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.Log4j2LogDelegateFactory");
     Vertx.vertx().deployVerticle(new MainVerticle());
   }
 }

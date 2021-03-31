@@ -3,40 +3,64 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
+    <parent>
+        <artifactId>vertx-parent</artifactId>
+        <groupId>io.vertx</groupId>
+        <version>19</version>
+    </parent>
   <groupId>io.vertx.demos</groupId>
   <artifactId>vertx-demos-mail</artifactId>
   <version>0.0.1</version>
 
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
 
   <properties>
-    <vertx.version>4.0.1-SNAPSHOT</vertx.version>
+    <vertx.version>4.1.0-SNAPSHOT</vertx.version>
     <vertx-maven-plugin.version>1.0.18</vertx-maven-plugin.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <exec-maven-plugin.version>1.5.0</exec-maven-plugin.version>
+    <log4j2.version>2.13.3</log4j2.version>
   </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-          <groupId>io.vertx</groupId>
-          <artifactId>vertx-stack-depchain</artifactId>
-          <version>${vertx.version}</version>
-          <type>pom</type>
-          <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <dependencies>
     <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-mail-client</artifactId>
+        <version>${vertx.version}</version>
     </dependency>
   <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
+      <version>${vertx.version}</version>
   </dependency>
+      <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-api</artifactId>
+          <version>${log4j2.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-core</artifactId>
+          <version>${log4j2.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+          <version>${log4j2.version}</version>
+      </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec-maven-plugin.version}</version>
+        <configuration>
+          <mainClass>io.github.gaol.samples.sendmail.MainVerticle</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
