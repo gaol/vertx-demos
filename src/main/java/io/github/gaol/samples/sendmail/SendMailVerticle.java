@@ -6,7 +6,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mail.MailClient;
 import io.vertx.ext.mail.MailConfig;
 import io.vertx.ext.mail.MailMessage;
-import io.vertx.ext.mail.StartTLSOptions;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -35,12 +34,11 @@ public class SendMailVerticle extends AbstractVerticle {
   public void start() throws Exception {
     i = ++idx;
     MailConfig mailConfig = new MailConfig()
-      .setPort(9465)
+      .setPort(9025)
       .setMaxPoolSize(10)
       .setHostname("127.0.0.1")
-      .setTrustAll(true)
-      .setStarttls(StartTLSOptions.OPTIONAL)
       .setUsername("testa@localtest.tld")
+      //.setUsername("testa")
       .setPassword("testa");
     mailClient = MailClient.createShared(vertx, mailConfig);
 
