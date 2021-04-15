@@ -21,6 +21,7 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <exec-maven-plugin.version>1.5.0</exec-maven-plugin.version>
     <log4j2.version>2.13.3</log4j2.version>
+    <junit.version>4.13.1</junit.version>
   </properties>
 
   <dependencies>
@@ -48,6 +49,25 @@
           <groupId>org.apache.logging.log4j</groupId>
           <artifactId>log4j-slf4j-impl</artifactId>
           <version>${log4j2.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>${junit.version}</version>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>io.vertx</groupId>
+          <artifactId>vertx-unit</artifactId>
+          <version>${vertx.version}</version>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>io.vertx</groupId>
+          <artifactId>vertx-core</artifactId>
+          <classifier>tests</classifier>
+          <version>${vertx.version}</version>
+          <scope>test</scope>
       </dependency>
   </dependencies>
 
