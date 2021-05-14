@@ -4,11 +4,15 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
 public class MainVerticle extends AbstractVerticle {
+
+  private final static Logger logger = LoggerFactory.getLogger("mail_verticle");
 
   private Router router;
 
@@ -21,26 +25,28 @@ public class MainVerticle extends AbstractVerticle {
     router.route("/sendwait").handler(this::sendAndWait);
     vertx.deployVerticle(SendMailVerticle.class, new DeploymentOptions().setInstances(8))
             .flatMap(did -> vertx.createHttpServer().requestHandler(router).listen(8888))
+            .onSuccess(hs -> logger.info("Http Server started on " + hs.actualPort()))
             .flatMap(http -> startPromise.future());
   }
 
   private void sendmail(RoutingContext ctx) {
-    vertx.eventBus().send(MAIL_SERVICE_ADDR, mailMessage(ctx));
-    ctx.end("Sent!");
+    vertx.eventBus().send(MAIL_SERVICE_ADDR, eventBusMessage(ctx));
+    ctx.end("Email Sent!");
   }
 
   private void sendAndWait(RoutingContext ctx) {
-    vertx.eventBus().request(MAIL_SERVICE_ADDR, mailMessage(ctx))
+    vertx.eventBus().request(MAIL_SERVICE_ADDR, eventBusMessage(ctx))
             .onComplete(r -> {
               if (r.succeeded()) {
                 ctx.end(r.result().body().toString());
               } else {
+                logger.error("Failed to send email on waiting", r.cause());
                 ctx.fail(r.cause());
               }
             });
   }
 
-  private JsonObject mailMessage(RoutingContext ctx) {
+  private JsonObject eventBusMessage(RoutingContext ctx) {
     JsonObject eventBusMessage = new JsonObject();
     setField(eventBusMessage, "from", ctx);
     setField(eventBusMessage, "to", ctx);
@@ -61,7 +67,6 @@ public class MainVerticle extends AbstractVerticle {
   }
 
   public static void main(String[] args) {
-    System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.Log4j2LogDelegateFactory");
     Vertx.vertx().deployVerticle(new MainVerticle());
   }
 }

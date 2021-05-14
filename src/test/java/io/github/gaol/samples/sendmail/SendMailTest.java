@@ -1,7 +1,6 @@
 package io.github.gaol.samples.sendmail;
 
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
 import io.vertx.core.file.OpenOptions;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
@@ -20,7 +19,7 @@ public class SendMailTest extends VertxTestBase {
     private final static Logger logger = LoggerFactory.getLogger("SendMailTest");
 
     @Test
-    public void testSendEmailWithAttachment(TestContext context) throws Exception {
+    public void testSendEmailWithAttachment(TestContext context) {
         String attachFilePath = "/home/lgao/Music/snow.mp3";
         String contentType = "audio/mpeg";
         final MailClient mailClient = SendMailVerticle.mailClient(vertx);
@@ -33,11 +32,14 @@ public class SendMailTest extends VertxTestBase {
                 .flatMap(af -> Future.succeededFuture(MailAttachment.create().setStream(af).setContentType(contentType)
                         .setName("Snow Song")))
                 .flatMap(attachment -> mailClient.sendMail(message.setAttachment(attachment)))
-                .onComplete(context.asyncAssertSuccess(mr -> logger.info(mr.toJson())));
+                .onComplete(context.asyncAssertSuccess(mr -> {
+                    mailClient.close();
+                    logger.info(mr.toJson());
+                }));
     }
 
     @Test
-    public void testSendEmailWithInAttachment(TestContext context) throws Exception {
+    public void testSendEmailWithInAttachment(TestContext context) {
         String attachFilePath = "/home/lgao/NetworkOptions.png";
         String contentType = "image/png";
         final MailClient mailClient = SendMailVerticle.mailClient(vertx);
@@ -53,7 +55,10 @@ public class SendMailTest extends VertxTestBase {
                         .setContentId("<NetworkOptions.png>")
                         .setDisposition("inline")))
                 .flatMap(attachment -> mailClient.sendMail(message.setInlineAttachment(attachment)))
-                .onComplete(context.asyncAssertSuccess(mr -> logger.info(mr.toJson())));
+                .onComplete(context.asyncAssertSuccess(mr -> {
+                    mailClient.close();
+                    logger.info(mr.toJson());
+                }));
     }
 
 }

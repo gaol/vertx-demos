@@ -12,7 +12,7 @@ import io.vertx.ext.mail.MailMessage;
 public class SendMailVerticle extends AbstractVerticle {
 
   private MailClient mailClient;
-  private final static Logger logger = LoggerFactory.getLogger("SendMailVerticle");
+  private final static Logger logger = LoggerFactory.getLogger("send_mail_verticle");
 
   static MailClient mailClient(Vertx vertx) {
     return MailClient.createShared(vertx, new MailConfig()
@@ -23,7 +23,7 @@ public class SendMailVerticle extends AbstractVerticle {
             .setPassword("testa"));
   }
 
-  private MailMessage getMailMessage(JsonObject body) {
+  private MailMessage mailMessage(JsonObject body) {
     MailMessage message = new MailMessage();
     message.setFrom(body.getString("from", "testa@localtest.tld"))
            .setTo(body.getString("to", "testb@localtest.tld"))
@@ -35,17 +35,17 @@ public class SendMailVerticle extends AbstractVerticle {
   @Override
   public void start() throws Exception {
     mailClient = mailClient(vertx);
+    logger.info(this.getClass().getSimpleName() + " gets deployed.");
     vertx.eventBus().<JsonObject>consumer(MainVerticle.MAIL_SERVICE_ADDR, m -> {
-      MailMessage message = getMailMessage(m.body());
+      MailMessage message = mailMessage(m.body());
       logger.info("message to be sent: \n" + message.toJson().encodePrettily());
       mailClient.sendMail(message)
               .onComplete(mr -> {
                 if (mr.succeeded()) {
                   if (m.replyAddress() != null) {
                     m.reply(new JsonObject().put("result", mr.result().toString()));
-                  } else {
-                    logger.info("Message Sent: " + mr.result());
                   }
+                  logger.info("Message Sent: " + mr.result());
                 } else {
                   if (m.replyAddress() != null) {
                     m.fail(500, mr.cause().getMessage());
