@@ -45,6 +45,7 @@
   <modules>
     <module>demos-http</module>
     <module>demos-service</module>
+    <module>all-in-one</module>
   </modules>
 
   <build>
