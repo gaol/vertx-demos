@@ -20,12 +20,13 @@
   <jgroups>
     <stack-file name="jgroups" path="jgroups-tcp.xml" />
   </jgroups>
-  
+
   <cache-container default-cache="distributed-cache">
     <transport stack="jgroups" cluster="demo-cluster" />
     <distributed-cache name="distributed-cache" />
-    <distributed-cache name="__vertx.subs" />
+    <replicated-cache name="__vertx.subs" />
     <replicated-cache name="__vertx.haInfo" />
+    <replicated-cache name="__vertx.nodeInfo"/>
     <distributed-cache-configuration name="__vertx.distributed.cache.configuration" />
   </cache-container>
   
