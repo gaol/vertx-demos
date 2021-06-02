@@ -8,9 +8,6 @@ public class MyHttpVerticle extends AbstractVerticle {
 
   @Override
   public void start() {
-      System.out.println(System.getenv());
-      System.out.println("========================================");
-      System.out.println(System.getProperties());
     Router router = Router.router(vertx);
     router.get("/").handler(rc -> {
       String city = rc.request().getParam("city");
