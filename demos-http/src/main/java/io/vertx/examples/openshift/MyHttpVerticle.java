@@ -1,13 +1,14 @@
 package io.vertx.examples.openshift;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 
 public class MyHttpVerticle extends AbstractVerticle {
 
   @Override
-  public void start() {
+  public void start(Promise<Void> startPromise) {
     Router router = Router.router(vertx);
     router.get("/").handler(rc -> {
       String city = rc.request().getParam("city");
@@ -29,6 +30,8 @@ public class MyHttpVerticle extends AbstractVerticle {
     vertx.createHttpServer()
         .requestHandler(router)
         .listen(8080)
-        .onComplete(hs -> System.out.println("Http server is listening on: " + hs.result().actualPort()));
+            .onSuccess(hs -> System.out.println("Http server is listening on: " + hs.actualPort()))
+            .<Void>mapEmpty()
+        .onComplete(startPromise);
   }
 }
