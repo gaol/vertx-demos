@@ -1,6 +1,11 @@
+<!--
+   This configuration file uses DNS_PING. You should set the DNS_PING dns_query parameter (or the jgroups.dns.query
+   property) to point to the DNS record which should return all members of the cluster.
+-->
 <config xmlns="urn:org:jgroups"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="urn:org:jgroups http://www.jgroups.org/schema/jgroups-4.2.xsd">
+
     <!-- jgroups.tcp.address is deprecated and will be removed, see ISPN-11867 -->
     <TCP bind_addr="${jgroups.bind.address,jgroups.tcp.address:SITE_LOCAL}"
          bind_port="${jgroups.bind.port,jgroups.tcp.port:7800}"
@@ -9,6 +14,8 @@
          send_buf_size="640k"
          sock_conn_timeout="300"
          bundler_type="no-bundler"
+         logical_addr_cache_expiration="360000"
+         port_range="0"
 
          thread_pool.min_threads="${jgroups.thread_pool.min_threads:0}"
          thread_pool.max_threads="${jgroups.thread_pool.max_threads:200}"
@@ -16,10 +23,8 @@
 
          thread_dumps_threshold="${jgroups.thread_dumps_threshold:10000}"
     />
-    <MPING mcast_addr="${jgroups.mcast_addr:228.6.7.8}"
-           mcast_port="${jgroups.mcast_port:46655}"
-           num_discovery_runs="3"
-           ip_ttl="${jgroups.udp.ip_ttl:2}"
+    <dns.DNS_PING dns_query="${jgroups.dns.query}"
+                  num_discovery_runs="3"
     />
     <MERGE3 min_interval="10000"
             max_interval="30000"
