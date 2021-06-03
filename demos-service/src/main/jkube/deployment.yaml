@@ -1,5 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
 spec:
   template:
+    metadata:
+      labels:
+        cluster: vertx-demo-app
     spec:
       containers:
         - name: vertx

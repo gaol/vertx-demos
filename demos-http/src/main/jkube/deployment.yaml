@@ -1,5 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
 spec:
   template:
+    metadata:
+      labels:
+        cluster: vertx-demo-app
     spec:
       containers:
         - name: vertx
@@ -13,10 +18,4 @@ spec:
               value: 'app=${project.artifactId}'
             - name: JAVA_ARGS
               value: '-Djava.net.preferIPv4Stack=true -Dvertx.jgroups.config=jgroups-k8s.xml -Djgroups.dns.query=${project.artifactId}.default.svc.cluster.local -cluster'
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            failureThreshold: 1
-            periodSeconds: 10
 

@@ -1,4 +1,3 @@
-
 <!--
    This configuration file uses DNS_PING. You should set the DNS_PING dns_query parameter (or the jgroups.dns.query
    property) to point to the DNS record which should return all members of the cluster.

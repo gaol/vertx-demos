@@ -3,6 +3,8 @@ package io.vertx.examples.openshift;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.healthchecks.HealthCheckHandler;
+import io.vertx.ext.healthchecks.Status;
 import io.vertx.ext.web.Router;
 
 public class MyHttpVerticle extends AbstractVerticle {
@@ -10,7 +12,12 @@ public class MyHttpVerticle extends AbstractVerticle {
   @Override
   public void start(Promise<Void> startPromise) {
     Router router = Router.router(vertx);
-    router.get("/").handler(rc -> {
+      HealthCheckHandler healthCheckHandler = HealthCheckHandler.create(vertx)
+              .register("server-online", fut -> fut.complete(Status.OK()));
+    router.get("/").handler(rc -> rc.response().end("OK"));
+    router.get("/readiness").handler(rc -> rc.response().end("OK"));
+    router.get("/liveness").handler(healthCheckHandler);
+    router.get("/price").handler(rc -> {
       String city = rc.request().getParam("city");
       if (city == null) {
         city = "bj";

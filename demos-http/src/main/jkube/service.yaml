@@ -3,8 +3,11 @@ kind: Service
 metadata:
   name: ${project.artifactId}
 spec:
+  selector:
+    cluster: vertx-demo-app
   type: NodePort
   ports:
     - protocol: TCP
       port: 80
       targetPort: 8080
+  publishNotReadyAddresses: false

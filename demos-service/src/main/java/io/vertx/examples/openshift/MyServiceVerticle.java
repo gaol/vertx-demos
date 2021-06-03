@@ -1,16 +1,20 @@
 package io.vertx.examples.openshift;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.healthchecks.HealthCheckHandler;
+import io.vertx.ext.healthchecks.Status;
+import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 
 public class MyServiceVerticle extends AbstractVerticle {
 
   @Override
-  public void start() {
+  public void start(Promise<Void> startPromise) {
     final WebClient webClient = WebClient.create(vertx);
     vertx.eventBus().<String>consumer("city-house-price")
         .handler(msg -> webClient.get(443, String.format("%s.lianjia.com", msg.body()), "/").send()
@@ -25,6 +29,19 @@ public class MyServiceVerticle extends AbstractVerticle {
                 msg.fail(500, asyncResult.cause().getMessage());
               }
             }));
+
+    Router router = Router.router(vertx);
+    HealthCheckHandler healthCheckHandler = HealthCheckHandler.create(vertx)
+            .register("server-online", fut -> fut.complete(Status.OK()));
+    router.get("/readiness").handler(rc -> rc.response().end("OK"));
+    router.get("/").handler(rc -> rc.response().end("OK"));
+    router.get("/liveness").handler(healthCheckHandler);
+    vertx.createHttpServer()
+            .requestHandler(router)
+            .listen(8080)
+            .onSuccess(hs -> System.out.println("Http server is listening on: " + hs.actualPort()))
+            .<Void>mapEmpty()
+            .onComplete(startPromise);
   }
 
   // ========================= STATIC UTILS METHODS =============================
