@@ -30,10 +30,6 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-infinispan</artifactId>
     </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-health-check</artifactId>
-    </dependency>
   </dependencies>
 
 </project>

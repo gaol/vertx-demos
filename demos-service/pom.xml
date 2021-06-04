@@ -15,7 +15,6 @@
 
   <properties>
     <vertx.verticle>io.vertx.examples.openshift.MyServiceVerticle</vertx.verticle>
-    <jkube.enricher.jkube-service.expose>false</jkube.enricher.jkube-service.expose>
   </properties>
 
   <dependencies>
@@ -25,20 +24,29 @@
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
       <artifactId>vertx-web-client</artifactId>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-infinispan</artifactId>
     </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-health-check</artifactId>
-    </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.jkube</groupId>
+        <artifactId>openshift-maven-plugin</artifactId>
+        <configuration>
+          <enricher>
+            <config>
+              <jkube-openshift-route>
+                <generateRoute>false</generateRoute>
+              </jkube-openshift-route>
+            </config>
+          </enricher>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

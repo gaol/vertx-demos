@@ -25,6 +25,7 @@
     <junit-jupiter.version>5.7.0</junit-jupiter.version>
     <vertx.verticle></vertx.verticle>
     <launcher.class>io.vertx.core.Launcher</launcher.class>
+    <jkube.skipHealthCheck>true</jkube.skipHealthCheck>
   </properties>
 
   <dependencyManagement>
