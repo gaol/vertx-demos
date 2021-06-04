@@ -9,13 +9,6 @@ spec:
       containers:
         - name: vertx
           env:
-            - name: KUBERNETES_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.namespace
-            - name: KUBERNETES_LABELS
-              value: 'app=${project.artifactId}'
             - name: JAVA_OPTS
               value: '-Djava.net.preferIPv4Stack=true -Dvertx.jgroups.config=jgroups-k8s.xml -Djgroups.dns.query=vertx-demo-cluster.vertx-demo.svc'
             - name: JAVA_ARGS
