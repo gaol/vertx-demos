@@ -16,6 +16,7 @@ spec:
                   fieldPath: metadata.namespace
             - name: KUBERNETES_LABELS
               value: 'app=${project.artifactId}'
+            - name: JAVA_OPTS
+              value: '-Djava.net.preferIPv4Stack=true -Dvertx.jgroups.config=jgroups-k8s.xml -Djgroups.dns.query=vertx-demo-cluster.vertx-demo.svc'
             - name: JAVA_ARGS
-              value: '-Djava.net.preferIPv4Stack=true -Dvertx.jgroups.config=jgroups-k8s.xml -Djgroups.dns.query=${project.artifactId}.default.svc.cluster.local -cluster'
-
+              value: '-cluster'

@@ -15,7 +15,7 @@
 
   <properties>
     <vertx.verticle>io.vertx.examples.openshift.MyServiceVerticle</vertx.verticle>
-    <jkube.openshift.generateRoute>false</jkube.openshift.generateRoute>
+    <jkube.enricher.jkube-service.expose>false</jkube.enricher.jkube-service.expose>
   </properties>
 
   <dependencies>
@@ -38,21 +38,6 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-health-check</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jgroups.kubernetes</groupId>
-      <artifactId>jgroups-kubernetes</artifactId>
-      <version>1.0.15.Final</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>undertow-core</artifactId>
-          <groupId>io.undertow</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
   </dependencies>
 

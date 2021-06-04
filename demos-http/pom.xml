@@ -34,21 +34,6 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-health-check</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jgroups.kubernetes</groupId>
-      <artifactId>jgroups-kubernetes</artifactId>
-      <version>1.0.15.Final</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>undertow-core</artifactId>
-          <groupId>io.undertow</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
   </dependencies>
 
 </project>
