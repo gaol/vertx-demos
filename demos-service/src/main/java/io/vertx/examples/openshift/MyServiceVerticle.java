@@ -1,8 +1,9 @@
 package io.vertx.examples.openshift;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpResponse;
@@ -10,23 +11,27 @@ import io.vertx.ext.web.client.WebClient;
 
 public class MyServiceVerticle extends AbstractVerticle {
 
+  private static final Logger logger = LoggerFactory.getLogger("service-verticle");
+
   @Override
-  public void start(Promise<Void> startPromise) {
+  public void start() {
     final WebClient webClient = WebClient.create(vertx);
     vertx.eventBus().<String>consumer("city-house-price")
-        .handler(msg -> webClient.get(443, String.format("%s.lianjia.com", msg.body()), "/").send()
+        .handler(msg -> webClient.get(443, String.format("%s.lianjia.com", msg.body()), "/").send() // get city Id
             .flatMap(resp -> webClient.get(443, String.format("%s.lianjia.com", msg.body()), reqPath(resp)).send())
             .onComplete(asyncResult -> {
               if (asyncResult.succeeded()) {
+                logger.info("Got the price back: \n" + asyncResult.result().bodyAsString());
                 msg.reply(cityHousePrice(asyncResult.result().bodyAsJsonObject()
                         .getJsonObject("currentLevel")
                         .getJsonObject("dealPrice")
                         .getJsonArray("total")));
               } else {
+                logger.error("Sorry, I cannot find the house price", asyncResult.cause());
                 msg.fail(500, asyncResult.cause().getMessage());
               }
             }));
-
+    logger.info("Listening on address: city-house-price to response house price of any city.");
   }
 
   // ========================= STATIC UTILS METHODS =============================
