@@ -1,12 +1,10 @@
 package io.github.gaol.samples.sendmail;
 
-import io.vertx.core.Future;
-import io.vertx.core.file.OpenOptions;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
-import io.vertx.ext.mail.MailAttachment;
 import io.vertx.ext.mail.MailClient;
-import io.vertx.ext.mail.MailMessage;
+import io.vertx.ext.mail.MailConfig;
+import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.test.core.VertxTestBase;
@@ -18,47 +16,79 @@ public class SendMailTest extends VertxTestBase {
 
     private final static Logger logger = LoggerFactory.getLogger("SendMailTest");
 
+    private final static int WAIT_TO_CLOSE = 1000 * 30;
+
+    // https://github.com/vert-x3/vertx-mail-client/issues/175
     @Test
-    public void testSendEmailWithAttachment(TestContext context) {
-        String attachFilePath = "/home/lgao/Music/snow.mp3";
-        String contentType = "audio/mpeg";
-        final MailClient mailClient = SendMailVerticle.mailClient(vertx);
-        final MailMessage message = new MailMessage()
-                .setFrom("testa@localtest.tld")
-                .setTo("testb@localtest.tld")
-                .setSubject("please download the snow.mp3")
-                .setText("There is a snow.mp3 in the attachment, it sounds great, enjoy it.");
-        vertx.fileSystem().open(attachFilePath, new OpenOptions())
-                .flatMap(af -> Future.succeededFuture(MailAttachment.create().setStream(af).setContentType(contentType)
-                        .setName("Snow Song")))
-                .flatMap(attachment -> mailClient.sendMail(message.setAttachment(attachment)))
-                .onComplete(context.asyncAssertSuccess(mr -> {
-                    mailClient.close();
-                    logger.info(mr.toJson());
-                }));
+    public void testSendEmailOffice365WithoutClose(TestContext context) {
+        Async async = context.async();
+        EmailVendor vendor = EmailVendor.OFFICE365;
+        SMTPAware smtpAware = new SMTPAware(vertx);
+        MailConfig mailConfig = smtpAware.mailConfig(vendor);
+        MailClient mailClient = MailClient.create(vertx, mailConfig);
+        mailClient.sendMail(smtpAware.emailMessage(vendor)).onComplete(ar -> {
+            logger.info(ar.result());
+            vertx.setTimer(WAIT_TO_CLOSE, l -> {
+                logger.info("Countdown after sometime waiting");
+                mailClient.close();
+                async.countDown();
+            });
+        });
+        async.await();
     }
 
     @Test
-    public void testSendEmailWithInAttachment(TestContext context) {
-        String attachFilePath = "/home/lgao/NetworkOptions.png";
-        String contentType = "image/png";
-        final MailClient mailClient = SendMailVerticle.mailClient(vertx);
-        final MailMessage message = new MailMessage()
-                .setFrom("testa@localtest.tld")
-                .setTo("testb@localtest.tld")
-                .setSubject("Network Options in Vert.x")
-                .setHtml("<html><body><h3>Please take look at the NetworkOptions.png for the options</h3>" +
-                        "<img width=\"640px\" height=\"480px\" src=\"cid:NetworkOptions.png\">\n" +
-                        "</img></body></html>");
-        vertx.fileSystem().open(attachFilePath, new OpenOptions())
-                .flatMap(af -> Future.succeededFuture(MailAttachment.create().setStream(af).setContentType(contentType)
-                        .setContentId("<NetworkOptions.png>")
-                        .setDisposition("inline")))
-                .flatMap(attachment -> mailClient.sendMail(message.setInlineAttachment(attachment)))
-                .onComplete(context.asyncAssertSuccess(mr -> {
-                    mailClient.close();
-                    logger.info(mr.toJson());
-                }));
+    public void testSendEmailGmailWithoutClose(TestContext context) {
+        Async async = context.async();
+        EmailVendor vendor = EmailVendor.GMAIL;
+        SMTPAware smtpAware = new SMTPAware(vertx);
+        MailConfig mailConfig = smtpAware.mailConfig(vendor);
+        MailClient mailClient = MailClient.create(vertx, mailConfig);
+        mailClient.sendMail(smtpAware.emailMessage(vendor)).onComplete(ar -> {
+            logger.info(ar.result());
+            vertx.setTimer(WAIT_TO_CLOSE, l -> {
+                logger.info("Countdown after sometime waiting");
+                mailClient.close();
+                async.countDown();
+            });
+        });
+        async.await();
+    }
+
+    @Test
+    public void testSendEmail163WithoutClose(TestContext context) {
+        Async async = context.async();
+        EmailVendor vendor = EmailVendor.MAIL_163;
+        SMTPAware smtpAware = new SMTPAware(vertx);
+        MailConfig mailConfig = smtpAware.mailConfig(vendor);
+        MailClient mailClient = MailClient.create(vertx, mailConfig);
+        mailClient.sendMail(smtpAware.emailMessage(vendor)).onComplete(ar -> {
+            logger.info(ar.result());
+            vertx.setTimer(WAIT_TO_CLOSE, l -> {
+                logger.info("Countdown after sometime waiting");
+                mailClient.close();
+                async.countDown();
+            });
+        });
+        async.await();
+    }
+
+    @Test
+    public void testSendLocalTestTldWithoutClose(TestContext context) {
+        Async async = context.async();
+        EmailVendor vendor = EmailVendor.LOCAL_TEST_TLD;
+        SMTPAware smtpAware = new SMTPAware(vertx);
+        MailConfig mailConfig = smtpAware.mailConfig(vendor);
+        MailClient mailClient = MailClient.create(vertx, mailConfig);
+        mailClient.sendMail(smtpAware.emailMessage(vendor)).onComplete(ar -> {
+            logger.info(ar.result());
+            vertx.setTimer(WAIT_TO_CLOSE, l -> {
+                logger.info("Countdown after sometime waiting");
+                mailClient.close();
+                async.countDown();
+            });
+        });
+        async.await();
     }
 
 }
