@@ -1,6 +1,7 @@
 package io.github.gaol.samples.sendmail;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mail.MailClient;
@@ -95,7 +96,7 @@ public class SendMailVerticle extends AbstractVerticle {
     sb.append("\nSending in each event loop:\n");
     AtomicLong caclTotal = new AtomicLong(0L);
     sentMails.forEach((k, v) -> {
-      sb.append(k).append("  :  \tsent ").append(v.get()).append(" emails.\n");
+      sb.append("Thread: " + k.getName()).append("  :  \tsent ").append(v.get()).append(" emails.\n");
       caclTotal.addAndGet(v.get());
     });
     sb.append("Sent emails count(calculated): \t").append(caclTotal.get()).append("\n");
@@ -120,8 +121,12 @@ public class SendMailVerticle extends AbstractVerticle {
   }
 
   @Override
-  public void stop() throws Exception {
+  public void stop(Promise<Void> stopPromise) throws Exception {
     mailClient.close();
+    vertx.setTimer(1000, v -> {
+      System.out.println("Stop complete! " + Thread.currentThread());
+      stopPromise.complete();
+    });
   }
 
   static void clearStatistics() {

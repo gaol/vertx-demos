@@ -9,6 +9,7 @@ import io.vertx.ext.mail.MailMessage;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
 public class MainVerticle extends AbstractVerticle {
@@ -94,7 +95,21 @@ public class MainVerticle extends AbstractVerticle {
   }
 
   public static void main(String[] args) {
+    Vertx vertx = Vertx.vertx();
     System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.Log4j2LogDelegateFactory");
-    Vertx.vertx().deployVerticle(new MainVerticle());
+    vertx.deployVerticle(new MainVerticle());
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      CountDownLatch latch = new CountDownLatch(1);
+      System.out.println("Going to call vertx.close");
+      vertx.close(v -> {
+        latch.countDown();
+        System.out.println("Vertx closed !!");
+      });
+      try {
+        latch.await();
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+    }));
   }
 }

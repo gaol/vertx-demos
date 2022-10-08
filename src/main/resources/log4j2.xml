@@ -24,8 +24,8 @@
     <Logger name="io.netty" level="info" additivity="false">
       <AppenderRef ref="STDOUT" level="info" />
     </Logger>
-    <Logger name="io.vertx" level="debug" additivity="false">
-      <AppenderRef ref="STDOUT" level="debug" />
+    <Logger name="io.vertx" level="trace" additivity="false">
+      <AppenderRef ref="STDOUT" level="trace" />
     </Logger>
     <Root level="info" additivity="false">
       <AppenderRef ref="STDOUT" />
