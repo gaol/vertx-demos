@@ -32,6 +32,12 @@ public class FakeData {
         private final String id;
         private final String name;
         private final double price;
+        HourcePrice(double price) {
+            this.id = null;
+            this.name = null;
+            this.price = price;
+        }
+
         HourcePrice(String id, String name, double price) {
             this.id = id;
             this.name = name;
@@ -42,9 +48,6 @@ public class FakeData {
             return new JsonObject().put("name", name).put("price", price);
         }
 
-        public JsonObject nameJson() {
-            return new JsonObject().put("id", id).put("name", name);
-        }
     }
 
     private final static HashMap<String, HourcePrice> prices = new HashMap<>(6);
@@ -64,10 +67,13 @@ public class FakeData {
         return prices.getOrDefault(name, NULL).json();
     }
 
-    public JsonArray cities() {
+    public JsonObject cities() {
         JsonArray ja = new JsonArray();
-        prices.values().forEach(hp -> ja.add(hp.nameJson()));
-        return ja;
+        prices.values().forEach(hp -> ja.add(hp.json()));
+        return new JsonObject()
+                .put("cities", prices.size())
+                .put("avg", prices.values().stream().reduce((h, p) -> new HourcePrice(h.price + p.price)).map(hp -> hp.price).get() / prices.size())
+                .put("data", ja);
     }
 
 }
