@@ -4,6 +4,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 
@@ -25,10 +26,20 @@ public class MyHttpVerticle extends AbstractVerticle {
                         } else {
                             JsonObject content = reply.result().body();
                             logger.info("Here is the house price of city " + city + ": " + content.encodePrettily());
-                            rc.response().end(content.toBuffer());
+                            rc.response().end(content.encodePrettily());
                         }
                     });
         });
+        router.get("/cities").handler(rc -> vertx.eventBus().<JsonArray>request("cities", "list")
+                .onComplete(reply -> {
+                    if (reply.failed()) {
+                        rc.response().setStatusCode(400).end(reply.cause().getMessage());
+                    } else {
+                        JsonArray content = reply.result().body();
+                        logger.info("Here are cities I know: " + content.encodePrettily());
+                        rc.response().end(content.encodePrettily());
+                    }
+                }));
 
         vertx.createHttpServer()
                 .requestHandler(router)
