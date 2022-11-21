@@ -11,7 +11,7 @@
   <properties>
     <vertx.verticle>io.vertx.examples.MyVerticle</vertx.verticle>
     <launcher.class>io.vertx.core.Launcher</launcher.class>
-    <vertx.version>4.3.6-SNAPSHOT</vertx.version>
+    <vertx.version>4.4.0-SNAPSHOT</vertx.version>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
