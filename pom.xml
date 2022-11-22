@@ -20,6 +20,7 @@
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
     <kotlin.version>1.8.0-Beta</kotlin.version>
+    <graalvm.version>22.3.0</graalvm.version>
   </properties>
 
   <dependencyManagement>
@@ -55,6 +56,36 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-lang-kotlin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.reactiverse</groupId>
+      <artifactId>es4x</artifactId>
+      <version>0.19.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.graalvm.sdk</groupId>
+      <artifactId>graal-sdk</artifactId>
+      <version>${graalvm.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.graalvm.truffle</groupId>
+      <artifactId>truffle-api</artifactId>
+      <version>${graalvm.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.graalvm.js</groupId>
+      <artifactId>js</artifactId>
+      <version>${graalvm.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.graalvm.tools</groupId>
+      <artifactId>profiler</artifactId>
+      <version>${graalvm.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.graalvm.tools</groupId>
+      <artifactId>chromeinspector</artifactId>
+      <version>${graalvm.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

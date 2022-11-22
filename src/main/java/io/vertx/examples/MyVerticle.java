@@ -13,6 +13,7 @@ public class MyVerticle extends AbstractVerticle {
                 .listen(8000)
                 .onSuccess(s -> context.putLocal("httpServerPort", s.actualPort()))
                 .flatMap(s -> vertx.deployVerticle("server.groovy"))
+                .flatMap(s -> vertx.deployVerticle("server.js"))
                 .flatMap(d -> vertx.deployVerticle("io.vertx.examples.Server"))
                 .onComplete(r -> {
                     if (r.succeeded()) {
