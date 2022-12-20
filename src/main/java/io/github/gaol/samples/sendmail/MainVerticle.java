@@ -7,6 +7,7 @@ import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mail.MailClient;
+import io.vertx.ext.mail.MailMessage;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
@@ -34,7 +35,10 @@ public class MainVerticle extends AbstractVerticle {
       EmailVendor vendor = EmailVendor.valueOf(ctx.request().getParam("vendor").toUpperCase());
       MailClient mailClient = MailClient.create(vertx, smTPAware.mailConfig(vendor));
       final long closeClientTimer = Long.parseLong(ctx.request().getParam("closeTimeout", "30000"));
-      mailClient.sendMail(smTPAware.emailMessage(vendor)).onComplete(r -> {
+      MailMessage mailMessage = smTPAware.emailMessage(vendor);
+      updateToMailMessage(mailMessage);
+      logger.info("mail message got updated: \nfrom: \n" + mailMessage.getFrom() + ",\n html: \n" + mailMessage.getHtml());
+      mailClient.sendMail(mailMessage).onComplete(r -> {
         if (r.succeeded()) {
           logger.info("Email Sent: " + r.result() + ", with vendor: " + vendor.name());
           ctx.end("Mail Sent, with vendor: " + vendor.name());
@@ -52,6 +56,22 @@ public class MainVerticle extends AbstractVerticle {
       logger.error("Failed to send email, return 400.", e);
       ctx.fail(400);
     }
+  }
+
+  private void updateToMailMessage(MailMessage mailMessage) {
+    StringBuilder sb = new StringBuilder("<!DOCTYPE html>\n" +
+            "<html>\n" +
+            "<head>\n" +
+            "<title>email title</title>\n" +
+            "</head>\n" +
+            "<body>\n" +
+            "<h1>This is the head 1 line</h1>\n" +
+            "<a href=\"https://this_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_charactersthis_is_a_very_long_link_than_1000_ascii_characters\">Here is a very long link exceeding 1000 characters</a>\n" +
+            "</body>\n" +
+            "</html>");
+    mailMessage.setText(null);
+    mailMessage.setHtml(sb.toString());
+    mailMessage.setTo("aoingl@gmail.com");
   }
 
   @Override
