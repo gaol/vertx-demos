@@ -15,8 +15,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <vertx.version>4.2.2-SNAPSHOT</vertx.version>
-        <vertx-maven-plugin.version>1.0.18</vertx-maven-plugin.version>
+        <vertx.version>4.3.5</vertx.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
