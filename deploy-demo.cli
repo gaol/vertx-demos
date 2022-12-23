@@ -1,0 +1,1 @@
+deploy target/vertx-demos-kafka-0.0.1.war
