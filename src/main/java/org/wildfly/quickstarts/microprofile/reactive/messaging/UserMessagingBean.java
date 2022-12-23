@@ -16,8 +16,13 @@
  */
 package org.wildfly.quickstarts.microprofile.reactive.messaging;
 
+import java.sql.Timestamp;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import io.smallrye.reactive.messaging.kafka.api.IncomingKafkaRecordMetadata;
+import io.smallrye.reactive.messaging.kafka.api.KafkaMetadataUtil;
+import io.smallrye.reactive.messaging.kafka.api.OutgoingKafkaRecordMetadata;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -25,6 +30,10 @@ import jakarta.ws.rs.core.Response;
 
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
+import org.eclipse.microprofile.reactive.messaging.Incoming;
+import org.eclipse.microprofile.reactive.messaging.Message;
+import org.eclipse.microprofile.reactive.messaging.Outgoing;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -36,7 +45,10 @@ public class UserMessagingBean {
     @Channel("user")
     private Emitter<String> emitter;
 
-    private BroadcastPublisher<String> broadcastPublisher;
+    @Inject
+    DatabaseBean dbBean;
+
+    private BroadcastPublisher<TimedEntry> broadcastPublisher;
 
     public UserMessagingBean() {
         //Needed for CDI spec compliance
@@ -44,7 +56,7 @@ public class UserMessagingBean {
     }
 
     @Inject
-    public UserMessagingBean(@Channel("user") Publisher<String> receiver) {
+    public UserMessagingBean(@Channel("from-kafka") Publisher<String> receiver) {
         this.broadcastPublisher = new BroadcastPublisher(receiver);
     }
 
@@ -59,7 +71,57 @@ public class UserMessagingBean {
         return Response.accepted().build();
     }
 
-    public Publisher<String> getPublisher() {
+
+    @Incoming("user")
+    @Outgoing("filter")
+    public String logAllMessages(String message) {
+        System.out.println("Received " + message);
+        return message;
+    }
+
+    @Incoming("filter")
+    @Outgoing("sender")
+    public PublisherBuilder<String> filter(PublisherBuilder<String> messages) {
+        return messages
+                .filter(s -> s.equals("Hello") || s.equals("Kafka"));
+    }
+
+    @Incoming("sender")
+    @Outgoing("to-kafka")
+    public Message<TimedEntry> sendToKafka(String msg) {
+        TimedEntry te = new TimedEntry(new Timestamp(System.currentTimeMillis()), msg);
+        Message<TimedEntry> m = Message.of(te);
+        // Just use the hash as the Kafka key for this example
+        int key = te.getMessage().hashCode();
+
+        // Create Metadata containing the Kafka key
+        OutgoingKafkaRecordMetadata<Integer> md = OutgoingKafkaRecordMetadata
+                .<Integer>builder()
+                .withKey(key)
+                .build();
+
+        // The returned message will have the metadata added
+        return KafkaMetadataUtil.writeOutgoingKafkaMetadata(m, md);
+    }
+
+    @Incoming("from-kafka")
+    public CompletionStage<Void> receiveFromKafka(Message<TimedEntry> message) {
+        TimedEntry payload = message.getPayload();
+
+        IncomingKafkaRecordMetadata<Integer, TimedEntry> md = KafkaMetadataUtil.readIncomingKafkaMetadata(message).get();
+        String msg =
+                "Received from Kafka, storing it in database\n" +
+                        "\t%s\n" +
+                        "\tkey: %d; partition: %d, topic: %s";
+        msg = String.format(msg, payload, md.getKey(), md.getPartition(), md.getTopic());
+        // publish to vertx event bus
+        // and store the data into database
+        System.out.println(msg);
+        dbBean.store(payload);
+        return message.ack();
+    }
+
+    public Publisher<TimedEntry> getPublisher() {
         return broadcastPublisher;
     }
 

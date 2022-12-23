@@ -22,13 +22,6 @@
 
 package org.wildfly.quickstarts.microprofile.reactive.messaging.test;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -47,7 +40,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import org.wildfly.quickstarts.microprofile.reactive.messaging.MessagingBean;
+import org.wildfly.quickstarts.microprofile.reactive.messaging.UserMessagingBean;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author <a href="mailto:kabir.khan@jboss.com">Kabir Khan</a>
@@ -68,7 +68,7 @@ public class ReactiveMessagingKafkaIT {
     public static WebArchive getDeployment() {
         final WebArchive webArchive = ShrinkWrap.create(WebArchive.class, "reactive-messaging-kafka-tx.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addPackage(MessagingBean.class.getPackage())
+                .addPackage(UserMessagingBean.class.getPackage())
                 .addAsWebInfResource("META-INF/persistence.xml", "classes/META-INF/persistence.xml")
                 .addAsWebInfResource("META-INF/microprofile-config.properties", "classes/META-INF/microprofile-config.properties");
 

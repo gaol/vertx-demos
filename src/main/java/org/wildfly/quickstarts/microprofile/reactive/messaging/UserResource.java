@@ -48,7 +48,7 @@ public class UserResource {
     @GET
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @Stream
-    public Publisher<String> get() {
+    public Publisher<TimedEntry> get() {
         return bean.getPublisher();
     }
 }
