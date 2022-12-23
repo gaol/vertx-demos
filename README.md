@@ -16,3 +16,8 @@ Steps to run the demo:
   > http :8080/vertx-demos-kafka-0.0.1/user
 * Open another terminal to send message to server for processing
   > http POST :8080/vertx-demos-kafka-0.0.1/user/&lt;message&gt;
+
+
+* docker pull confluentinc/cp-kafka:6.1.9
+* docker pull postgres:10.10
+* 
