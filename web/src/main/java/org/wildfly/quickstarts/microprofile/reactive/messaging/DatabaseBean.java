@@ -16,15 +16,26 @@
  */
 package org.wildfly.quickstarts.microprofile.reactive.messaging;
 
-import java.util.List;
-
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.pgclient.PgConnectOptions;
+import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.PoolOptions;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.Tuple;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
-import jakarta.transaction.Transactional;
+
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
 
 /**
  * @author <a href="mailto:kabir.khan@jboss.com">Kabir Khan</a>
@@ -36,17 +47,65 @@ public class DatabaseBean {
     @Inject
     private Vertx vertx;
 
-    @PersistenceContext(unitName = "test")
-    EntityManager em;
+    private PgPool pool;
 
-    @Transactional
-    public void store(Object entry) {
-        em.persist(entry);
+    @PostConstruct
+    public void postConstruct() {
+        PgConnectOptions connectOptions = new PgConnectOptions()
+                .setPort(5432)
+                .setHost("localhost")
+                .setDatabase("postgres")
+                .setUser("postgres")
+                .setPassword("postgres");
+        PoolOptions poolOptions = new PoolOptions().setMaxSize(5);
+        pool = PgPool.pool(vertx, connectOptions, poolOptions);
     }
 
-    public List<TimedEntry> loadAllTimedEntries() {
-        TypedQuery<TimedEntry> query = em.createQuery("SELECT t from TimedEntry t", TimedEntry.class);
-        List<TimedEntry> result = query.getResultList();
-        return result;
+    @PreDestroy
+    public void destroy() {
+        try {
+            pool.close().toCompletionStage().toCompletableFuture().get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public CompletionStage<Void> store(TimedEntry entry) {
+        return pool.getConnection()
+                .compose(conn -> conn.preparedQuery("INSERT INTO TimedEntry (id, time, message) VALUES ($1, $2, $3)")
+                        .execute(Tuple.of(entryId(entry), dateTime(entry.getTime().getTime()), entry.getMessage()))
+                        .eventually(v -> conn.close()))
+                .<Void>flatMap(rows -> Future.succeededFuture())
+                .toCompletionStage();
+    }
+
+    public Future<List<TimedEntry>> loadAllTimedEntries() {
+        return pool.getConnection().compose(conn -> conn.preparedQuery("SELECT id, time, message FROM TimedEntry")
+                        .mapping(timedEntryMapper)
+                        .execute()
+                        .eventually(v-> conn.close()))
+                .map(timedEntries -> {
+                    List<TimedEntry> result = new ArrayList<>();
+                    timedEntries.forEach(result::add);
+                    return result;
+                })
+        ;
+    }
+
+    private static final Function<Row, TimedEntry> timedEntryMapper = row -> {
+        Long id = row.getLong("id");
+        Timestamp time = Timestamp.valueOf(row.getLocalDateTime("time"));
+        String message = row.getString("message");
+        TimedEntry te = new TimedEntry(time, message);
+        te.setId(id);
+        return te;
+    };
+
+    private LocalDateTime dateTime(long time) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault());
+    }
+
+    private long entryId(TimedEntry entry){
+        return entry.getId() == null ? System.nanoTime() : entry.getId();
     }
 }

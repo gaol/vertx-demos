@@ -17,6 +17,7 @@
 package org.wildfly.quickstarts.microprofile.reactive.messaging;
 
 import java.util.List;
+import java.util.concurrent.CompletionStage;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -32,13 +33,8 @@ public class RootResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String getRootResponse() {
-        List<TimedEntry> entries = dbBean.loadAllTimedEntries();
-        StringBuffer sb = new StringBuffer();
-        for (TimedEntry t : entries) {
-            sb.append(t);
-            sb.append("\n");
-        }
-        return sb.toString();
+    public CompletionStage<List<TimedEntry>> getRootResponse() {
+        return dbBean.loadAllTimedEntries()
+                .toCompletionStage();
     }
 }
