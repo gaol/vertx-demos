@@ -87,8 +87,7 @@ public class UserMessagingBean {
     @Incoming("filter")
     @Outgoing("sender")
     public PublisherBuilder<String> filter(PublisherBuilder<String> messages) {
-        return messages
-                .filter(s -> s.equals("Hello") || s.equals("Kafka"));
+        return messages.filter(s -> !s.contains("stop"));
     }
 
     @Incoming("sender")
@@ -112,18 +111,18 @@ public class UserMessagingBean {
     @Incoming("from-kafka")
     public CompletionStage<Void> receiveFromKafka(Message<TimedEntry> message) {
         TimedEntry payload = message.getPayload();
-
         IncomingKafkaRecordMetadata<Integer, TimedEntry> md = KafkaMetadataUtil.readIncomingKafkaMetadata(message).get();
-        String msg =
-                "Received from Kafka, storing it in database\n" +
-                        "\t%s\n" +
-                        "\tkey: %d; partition: %d, topic: %s";
-        msg = String.format(msg, payload, md.getKey(), md.getPartition(), md.getTopic());
+        String msg = String.format("Received from Kafka, storing it in database\n\t" +
+                "%s\n\tkey: %d; partition: %d, topic: %s", payload, md.getKey(), md.getPartition(), md.getTopic());
         // publish to vertx event bus
         // and store the data into database
         System.out.println(msg);
-        dbBean.store(payload);
-        return vertx.eventBus().publisher(MyVerticle.ADDRESS).write(msg).toCompletionStage();
+        if (payload.getMessage().contains("Vertx")) {
+            return dbBean.store(payload)
+                    .thenCompose(v -> vertx.eventBus().publisher(MyVerticle.ADDRESS).write(msg).toCompletionStage());
+        } else {
+            return dbBean.store(payload);
+        }
     }
 
     public Publisher<TimedEntry> getPublisher() {
