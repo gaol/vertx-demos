@@ -9,7 +9,7 @@
   <version>0.0.1</version>
 
   <properties>
-    <vertx.verticle>io.vertx.examples.MyVerticle</vertx.verticle>
+    <vertx.verticle>io.vertx.examples.polyglot.MainPolyglotVerticle</vertx.verticle>
     <launcher.class>io.vertx.core.Launcher</launcher.class>
     <vertx.version>4.3.6</vertx.version>
     <maven.compiler.source>11</maven.compiler.source>

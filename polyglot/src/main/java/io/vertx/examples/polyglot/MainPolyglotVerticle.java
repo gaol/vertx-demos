@@ -1,9 +1,9 @@
-package io.vertx.examples;
+package io.vertx.examples.polyglot;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 
-public class MyVerticle extends AbstractVerticle {
+public class MainPolyglotVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
@@ -14,7 +14,7 @@ public class MyVerticle extends AbstractVerticle {
                 .onSuccess(s -> context.putLocal("httpServerPort", s.actualPort()))
                 .flatMap(s -> vertx.deployVerticle("server.groovy"))
                 .flatMap(s -> vertx.deployVerticle("server.js"))
-                .flatMap(d -> vertx.deployVerticle("io.vertx.examples.Server"))
+                .flatMap(d -> vertx.deployVerticle("io.vertx.examples.polyglot.Server"))
                 .onComplete(r -> {
                     if (r.succeeded()) {
                         System.out.printf("Starts HttpServer from Java at: %d%n", (Integer) context.getLocal("httpServerPort"));

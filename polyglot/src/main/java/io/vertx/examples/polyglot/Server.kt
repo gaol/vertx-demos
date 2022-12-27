@@ -1,4 +1,4 @@
-package io.vertx.examples;
+package io.vertx.examples.polyglot;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise
