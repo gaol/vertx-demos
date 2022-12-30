@@ -7,17 +7,17 @@ public class MainPolyglotVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
-        vertx.createHttpServer().requestHandler(r -> r.response()
-                        .putHeader("Content-Type", "text/html")
-                        .end("<html><body><h1>Hello from vert.x in Java!</h1></body></html>"))
-                .listen(8000)
-                .onSuccess(s -> context.putLocal("httpServerPort", s.actualPort()))
-                .flatMap(s -> vertx.deployVerticle("server.groovy"))
+        vertx.deployVerticle("server.groovy")
                 .flatMap(s -> vertx.deployVerticle("server.js"))
-                .flatMap(d -> vertx.deployVerticle("io.vertx.examples.polyglot.Server"))
+                .flatMap(s -> vertx.deployVerticle("io.vertx.examples.polyglot.Server"))
+                .flatMap(s -> vertx.createHttpServer()
+                        .requestHandler(r -> r.response()
+                                .putHeader("Content-Type", "text/html")
+                                .end("<html><body><h1>Hello from vert.x in Java!</h1></body></html>"))
+                        .listen(8000))
                 .onComplete(r -> {
                     if (r.succeeded()) {
-                        System.out.printf("Starts HttpServer from Java at: %d%n", (Integer) context.getLocal("httpServerPort"));
+                        System.out.printf("Starts HttpServer from Java at: %d%n", r.result().actualPort());
                         startPromise.complete();
                     } else {
                         r.cause().printStackTrace();
