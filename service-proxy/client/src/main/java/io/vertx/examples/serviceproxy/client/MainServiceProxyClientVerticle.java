@@ -27,7 +27,7 @@ public class MainServiceProxyClientVerticle extends AbstractVerticle {
         router = Router.router(vertx);
         router.route()
                 .handler(BodyHandler.create())
-                .handler(StaticHandler.create());
+                .handler(StaticHandler.create().setCachingEnabled(false));
         vertx.createHttpServer()
                 .requestHandler(router)
                 .listen(Integer.getInteger("http.server", 8000))

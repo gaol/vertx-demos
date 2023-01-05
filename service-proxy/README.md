@@ -4,7 +4,32 @@ The demo of showing how vertx-service-proxy is used
 
 ## Structure of the demo
 
-The demo runs a `2` nodes cluster, one node is `service node` which registers the DBService implementation on event bus: `db.service`, the other node is `client node` which starts a http server waiting for requests for operations to the DBService. There will be a `DBServiceVertxEBProxy` generated and running on the client node, which will delegate all the DBService methods call via the eventbus.
+The demo runs a `2` nodes cluster using `hazelcast` cluster manager, one node is `service node` which registers the DBService implementation on event bus address: `db.service`, the other node is `client node` which starts a http server waiting for requests for operations to the DBService.
+
+There will be a `DBServiceVertxEBProxy` generated and running on the client node, which will delegate all the DBService method calls via the eventbus, it is included in the produced artifact with `api` classifier:
+
+```xml
+<dependency>
+    <groupId>${project.groupId}</groupId>
+    <artifactId>vertx-demos-service-proxy-service</artifactId>
+    <classifier>api</classifier>
+    <version>${project.version}</version>
+</dependency>
+```
+
+The `service` module also generates a `sockjs` service proxy which can be used in a NodeJS application. The generated TypeScript/Javascript are included in the produced artifact with `js` classifier:
+
+```xml
+<dependency>
+    <groupId>${project.groupId}</groupId>
+    <artifactId>vertx-demos-service-proxy-service</artifactId>
+    <classifier>js</classifier>
+    <version>${project.version}</version>
+</dependency>
+```
+
+The client node also set up a [SockJS EventBus Bridge](https://vertx.io/docs/vertx-web/java/#_sockjs_event_bus_bridge) in the HTTP Server to bridge eventbus messages between web browser and other places in the eventbus.
+
 
 ## How to run the demo
 
@@ -57,3 +82,5 @@ content-length: 459
 
 ```
 
+* There is a one-page application(OPA) NodeJS application running at `http://localhost:8000/`, open it using your web browser, you can see the demonstration on the page.
+   * Input the name and message that you want to send, and click the Send button, you will see the message got sent to the service node, and you will see the messagae is listed in the right.
