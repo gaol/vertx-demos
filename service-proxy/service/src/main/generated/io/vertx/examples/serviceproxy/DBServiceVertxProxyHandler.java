@@ -45,6 +45,8 @@ import java.util.List;
 import io.vertx.examples.serviceproxy.DBService;
 import io.vertx.core.Vertx;
 import io.vertx.examples.serviceproxy.DataEntry;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Future;
 /*
   Generated Proxy code - DO NOT EDIT
@@ -123,11 +125,12 @@ public class DBServiceVertxProxyHandler extends ProxyHandler {
       accessed();
       switch (action) {
         case "save": {
-          service.save(json.getJsonObject("data") != null ? new io.vertx.examples.serviceproxy.DataEntry((JsonObject)json.getJsonObject("data")) : null).onComplete(HelperUtils.createHandler(msg, includeDebugInfo));
+          service.save(json.getJsonObject("data") != null ? new io.vertx.examples.serviceproxy.DataEntry((JsonObject)json.getJsonObject("data")) : null,
+                        HelperUtils.createHandler(msg, includeDebugInfo));
           break;
         }
         case "load": {
-          service.load().onComplete(res -> {
+          service.load(res -> {
                         if (res.failed()) {
                           HelperUtils.manageFailure(msg, res.cause(), includeDebugInfo);
                         } else {

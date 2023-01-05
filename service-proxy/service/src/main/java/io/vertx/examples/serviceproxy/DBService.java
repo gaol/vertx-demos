@@ -19,7 +19,10 @@ package io.vertx.examples.serviceproxy;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 
 import java.util.List;
@@ -45,14 +48,28 @@ public interface DBService {
      * @param data the data to save
      * @return a Future
      */
-    Future<Void> save(DataEntry data);
+//    @GenIgnore
+    default Future<Void> save(DataEntry data) {
+        Promise<Void> promise = Promise.promise();
+        save(data, promise);
+        return promise.future();
+    }
+
+    void save(DataEntry data, Handler<AsyncResult<Void>> handler);
 
     /**
      * Loads data from database.
      *
      * @return a Future
      */
-    Future<List<DataEntry>> load();
+//    @GenIgnore
+    default Future<List<DataEntry>> load() {
+        Promise<List<DataEntry>> promise = Promise.promise();
+        load(promise);
+        return promise.future();
+    }
+
+    void load(Handler<AsyncResult<List<DataEntry>>> handler);
 
     /**
      * Close to release the resources.

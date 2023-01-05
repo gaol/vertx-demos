@@ -36,6 +36,8 @@ import java.util.List;
 import io.vertx.examples.serviceproxy.DBService;
 import io.vertx.core.Vertx;
 import io.vertx.examples.serviceproxy.DataEntry;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Future;
 /*
   Generated Proxy code - DO NOT EDIT
@@ -64,30 +66,44 @@ public class DBServiceVertxEBProxy implements DBService {
   }
 
   @Override
-  public Future<Void> save(DataEntry data){
-    if (closed) return io.vertx.core.Future.failedFuture("Proxy is closed");
+  public void save(DataEntry data, Handler<AsyncResult<Void>> handler){
+    if (closed) {
+      handler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
     JsonObject _json = new JsonObject();
     _json.put("data", data != null ? data.toJson() : null);
 
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "save");
     _deliveryOptions.getHeaders().set("action", "save");
-    return _vertx.eventBus().<Void>request(_address, _json, _deliveryOptions).map(msg -> {
-      return msg.body();
+    _vertx.eventBus().<Void>request(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        handler.handle(Future.failedFuture(res.cause()));
+      } else {
+        handler.handle(Future.succeededFuture(res.result().body()));
+      }
     });
   }
   @Override
-  public Future<List<DataEntry>> load(){
-    if (closed) return io.vertx.core.Future.failedFuture("Proxy is closed");
+  public void load(Handler<AsyncResult<List<DataEntry>>> handler){
+    if (closed) {
+      handler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
     JsonObject _json = new JsonObject();
 
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "load");
     _deliveryOptions.getHeaders().set("action", "load");
-    return _vertx.eventBus().<JsonArray>request(_address, _json, _deliveryOptions).map(msg -> {
-      return msg.body().stream()
-        .map(v -> v != null ? new io.vertx.examples.serviceproxy.DataEntry((JsonObject)v) : null)
-        .collect(Collectors.toList());
+    _vertx.eventBus().<JsonArray>request(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        handler.handle(Future.failedFuture(res.cause()));
+      } else {
+        handler.handle(Future.succeededFuture(res.result().body().stream()
+          .map(v -> v != null ? new io.vertx.examples.serviceproxy.DataEntry((JsonObject)v) : null)
+          .collect(Collectors.toList())));
+      }
     });
   }
 }

@@ -17,6 +17,7 @@
   <properties>
     <vertx.verticle>io.vertx.examples.serviceproxy.MainServiceProxyVerticle</vertx.verticle>
     <launcher.class>io.vertx.core.Launcher</launcher.class>
+    <graalvm.version>22.3.0</graalvm.version>
   </properties>
 
   <dependencies>
@@ -31,6 +32,10 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-service-proxy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-sockjs-service-proxy</artifactId>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -90,6 +95,19 @@
             <configuration>
               <descriptors>
                 <descriptor>assembly-api.xml</descriptor>
+              </descriptors>
+              <appendAssemblyId>true</appendAssemblyId>
+            </configuration>
+          </execution>
+          <execution>
+            <id>assemble-js</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>assembly-js.xml</descriptor>
               </descriptors>
               <appendAssemblyId>true</appendAssemblyId>
             </configuration>

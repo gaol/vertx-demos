@@ -1,0 +1,41 @@
+{
+  "name": "webpack-vertx-db-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+
+  "author": "Lin Gao",
+  "license": "MIT",
+
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build && rm -rf webroot && mv build webroot"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+
+  "dependencies": {
+    "@vertx/eventbus-bridge-client.js": "1.0.0",
+    "react-syntax-highlighter": "^15.5.0",
+    "bootstrap": "^4.6.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-bootstrap": "^1.5.2",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4"
+  }
+
+}

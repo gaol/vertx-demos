@@ -16,8 +16,9 @@
  */
 package io.vertx.examples.serviceproxy;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.pgclient.PgPool;
@@ -47,19 +48,20 @@ public class DBServiceImpl implements DBService {
     }
 
     @Override
-    public Future<Void> save(DataEntry data) {
+    public void save(DataEntry data, Handler<AsyncResult<Void>> handler) {
         System.out.println("saving data: " + data);
-        return pool.getConnection()
+        pool.getConnection()
                 .compose(conn -> conn.preparedQuery("INSERT INTO DataEntry (id, name, message) VALUES ($1, $2, $3)")
                         .execute(Tuple.of(data.getId(), data.getName(), data.getMessage()))
                         .eventually(v -> conn.close()))
-                .flatMap(rows -> Future.succeededFuture());
+                .flatMap(rows -> Future.<Void>succeededFuture())
+                .onComplete(handler);
     }
 
     @Override
-    public Future<List<DataEntry>> load() {
+    public void load(Handler<AsyncResult<List<DataEntry>>> handler) {
         System.out.println("loading all data...");
-        return pool.getConnection().compose(conn -> conn.preparedQuery("SELECT id, name, message FROM DataEntry")
+        pool.getConnection().compose(conn -> conn.preparedQuery("SELECT id, name, message FROM DataEntry")
                         .mapping(dataEntryMapping)
                         .execute()
                         .eventually(v-> conn.close()))
@@ -67,7 +69,7 @@ public class DBServiceImpl implements DBService {
                     List<DataEntry> result = new ArrayList<>();
                     timedEntries.forEach(result::add);
                     return result;
-                });
+                }).onComplete(handler);
     }
 
     private static final Function<Row, DataEntry> dataEntryMapping = row -> {

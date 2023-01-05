@@ -5,9 +5,13 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.examples.serviceproxy.DBService;
 import io.vertx.examples.serviceproxy.DataEntry;
+import io.vertx.ext.bridge.PermittedOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.StaticHandler;
+import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions;
+import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 
 import java.util.stream.Collectors;
 
@@ -21,7 +25,9 @@ public class MainServiceProxyClientVerticle extends AbstractVerticle {
     public void start(Promise<Void> startPromise) {
         dbService = DBService.serviceProxy(vertx, "db.service");
         router = Router.router(vertx);
-        router.route().handler(BodyHandler.create());
+        router.route()
+                .handler(BodyHandler.create())
+                .handler(StaticHandler.create());
         vertx.createHttpServer()
                 .requestHandler(router)
                 .listen(Integer.getInteger("http.server", 8000))
@@ -37,6 +43,14 @@ public class MainServiceProxyClientVerticle extends AbstractVerticle {
         router.get("/list").handler(this::list);
         router.post("/save/:name/").handler(this::save);
         router.post("/post").handler(this::save);
+
+        // Allow events for the designated addresses in/out of the event bus bridge
+        SockJSBridgeOptions opts = new SockJSBridgeOptions()
+                .addInboundPermitted(new PermittedOptions()
+                        .setAddress("db.service"))
+                .addOutboundPermitted(new PermittedOptions()
+                        .setAddress("db.service"));
+        router.route("/eventbus/*").subRouter(SockJSHandler.create(vertx).bridge(opts));
     }
 
     @Override
