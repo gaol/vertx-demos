@@ -7,8 +7,8 @@ public class MainVerticle extends AbstractVerticle {
 
   @Override
   public void start(Promise<Void> startPromise) {
-      vertx.deployVerticle(new MyHttpVerticle())
-              .flatMap(d -> vertx.deployVerticle(new MyServiceVerticle()))
+      vertx.deployVerticle(new HttpVerticle())
+              .flatMap(d -> vertx.deployVerticle(new ServiceVerticle()))
               .<Void>mapEmpty()
               .onComplete(startPromise);
   }

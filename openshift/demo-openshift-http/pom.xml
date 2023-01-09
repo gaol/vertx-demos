@@ -11,22 +11,24 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>vertx-demo-openshift-all-in-one</artifactId>
+  <artifactId>vertx-demo-openshift-http</artifactId>
 
   <properties>
-    <vertx.verticle>io.vertx.examples.openshift.MainVerticle</vertx.verticle>
+    <vertx.verticle>io.vertx.examples.openshift.HttpVerticle</vertx.verticle>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>vertx-demo-openshift-http</artifactId>
-      <version>${project.version}</version>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>vertx-demo-openshift-service</artifactId>
-      <version>${project.version}</version>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-infinispan</artifactId>
     </dependency>
   </dependencies>
 

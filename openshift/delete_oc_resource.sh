@@ -1,12 +1,14 @@
-oc delete deploymentconfig.apps.openshift.io/vertx-demos-http
-oc delete buildconfig.build.openshift.io/vertx-demos-service-s2i
-oc delete replicationcontroller/vertx-demos-http-1
-oc delete deploymentconfig.apps.openshift.io/vertx-demos-service
-oc delete buildconfig.build.openshift.io/vertx-demos-http-s2i
-oc delete build.build.openshift.io/vertx-demos-http-s2i-1
-oc delete service/vertx-demo-cluster
-oc delete service/vertx-demos-http
-oc delete service/vertx-demos-service
-oc delete imagestream.image.openshift.io/vertx-demos-http
-oc delete imagestream.image.openshift.io/vertx-demos-service
-oc delete route.route.openshift.io/vertx-demos-http
+oc delete bc vertx-demo-openshift-http-s2i
+oc delete dc vertx-demo-openshift-http
+oc delete service/vertx-demo-openshift-http
+oc delete imagestream.image.openshift.io/vertx-demo-openshift-http
+
+oc delete bc vertx-demo-openshift-service-s2i
+oc delete dc vertx-demo-openshift-service
+oc delete service/vertx-demos-openshift-service
+oc delete imagestream.image.openshift.io/vertx-demo-openshift-service
+
+oc delete route.route.openshift.io/vertx-demo-openshift-http
+
+
+oc delete service vertx-demo-openshift-cluster

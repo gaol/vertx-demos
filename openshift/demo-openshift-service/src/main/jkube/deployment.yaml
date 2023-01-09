@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    metadata:
+      labels:
+        cluster: vertx-demo-openshift
+    spec:
+      containers:
+        - name: vertx
+          env:
+            - name: JAVA_OPTIONS
+              value: '-Djava.net.preferIPv4Stack=true -Dvertx.jgroups.config=jgroups-k8s.xml -Djgroups.dns.query=vertx-demo-openshift-cluster.vertx-demo-openshift.svc'
+            - name: JAVA_ARGS
+              value: '-cluster'

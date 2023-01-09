@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: vertx-demo-cluster
+  name: vertx-demo-openshift-cluster
 spec:
   selector:
-    cluster: vertx-demo-app
+    cluster: vertx-demo-openshift
   ports:
     - name: jgroups
       port: 7800
