@@ -16,6 +16,7 @@
  */
 package org.wildfly.quickstarts.microprofile.reactive.messaging;
 
+import io.vertx.reactivex.core.eventbus.Message;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -37,6 +38,9 @@ public class UserResource {
     @Inject
     UserMessagingBean bean;
 
+    @Inject
+    io.vertx.reactivex.core.Vertx vertx;
+
     @POST
     @Path("{value}")
     @Consumes(MediaType.TEXT_PLAIN)
@@ -51,4 +55,14 @@ public class UserResource {
     public Publisher<TimedEntry> get() {
         return bean.getPublisher();
     }
+
+    @GET
+    @Path("/timer")
+    @Produces(MediaType.SERVER_SENT_EVENTS)
+    @Stream
+    public Publisher<String> getTimer() {
+        return vertx.eventBus().<String>consumer(TimerVerticle.TIME_REPORT_ADDRESS)
+                .toFlowable().map(Message::body);
+    }
+
 }

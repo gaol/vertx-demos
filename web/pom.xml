@@ -27,9 +27,20 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-rx-java2</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>${groupId}</groupId>
       <artifactId>vertx-demos-kafka-verticle</artifactId>
       <version>${version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- Import the CDI API, we use provided scope as the API is included in WildFly -->

@@ -1,0 +1,7 @@
+{
+  "deployments": [
+    {
+      "verticle-class": "org.wildfly.quickstarts.microprofile.reactive.messaging.TimerVerticle"
+    }
+  ]
+}
