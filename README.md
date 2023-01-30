@@ -1,8 +1,8 @@
 # vertx-demos
 
-This is a demo to show how the [microprofile-reactive-messaging-kafka](https://github.com/wildfly/quickstart/tree/main/microprofile-reactive-messaging-kafka) quickstart can be adapted to run in the [wildfly-vertx-extension](https://github.com/gaol/wildfly-vertx-extension/).
+This is a demo to show how the [microprofile-reactive-messaging-kafka](https://github.com/wildfly/quickstart/tree/main/microprofile-reactive-messaging-kafka) quickstart can be extended to run with  [wildfly-vertx-extension](https://github.com/gaol/wildfly-vertx-extension/).
 
-Based on the quickstart, this changed the DatabaseBean to use a vertx-pg-client to store the data into and retrieve the data from a PostgreSQL server running in a container.
+Based on the quickstart, this changed the DatabaseBean to use a `vertx-pg-client` to store the data into and retrieve the data from a PostgreSQL server running in a container.
 
 Steps to run the demo:
 

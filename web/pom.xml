@@ -39,6 +39,11 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.eclipse.microprofile.config</groupId>
+      <artifactId>microprofile-config-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
     <!-- Import the Reactive Messaging API, we use provided scope as the API is included in WildFly -->
     <dependency>
       <groupId>org.eclipse.microprofile.reactive.messaging</groupId>

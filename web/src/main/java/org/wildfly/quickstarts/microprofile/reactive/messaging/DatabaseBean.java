@@ -27,6 +27,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -47,16 +48,15 @@ public class DatabaseBean {
     @Inject
     private Vertx vertx;
 
+    @Inject
+    @ConfigProperty(name = "db.postgresql.connection.url")
+    private String dbConnectionUrl;
+
     private PgPool pool;
 
     @PostConstruct
     public void postConstruct() {
-        PgConnectOptions connectOptions = new PgConnectOptions()
-                .setPort(5432)
-                .setHost("localhost")
-                .setDatabase("postgres")
-                .setUser("postgres")
-                .setPassword("postgres");
+        PgConnectOptions connectOptions = PgConnectOptions.fromUri(dbConnectionUrl);
         PoolOptions poolOptions = new PoolOptions().setMaxSize(5);
         pool = PgPool.pool(vertx, connectOptions, poolOptions);
     }
