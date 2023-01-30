@@ -70,6 +70,14 @@ public class DatabaseBean {
         }
     }
 
+//    @PersistenceContext(unitName = "test")
+//    EntityManager em;
+//
+//    @Transactional
+//    public void store(Object entry) {
+//        em.persist(entry);
+//    }
+
     public CompletionStage<Void> store(TimedEntry entry) {
         return pool.getConnection()
                 .compose(conn -> conn.preparedQuery("INSERT INTO TimedEntry (id, time, message) VALUES ($1, $2, $3)")

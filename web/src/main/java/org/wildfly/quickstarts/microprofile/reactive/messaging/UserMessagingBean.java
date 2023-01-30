@@ -17,6 +17,7 @@
 package org.wildfly.quickstarts.microprofile.reactive.messaging;
 
 import java.sql.Timestamp;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -117,12 +118,16 @@ public class UserMessagingBean {
         // publish to vertx event bus
         // and store the data into database
         System.out.println(msg);
-        if (payload.getMessage().contains("Vertx")) {
-            return dbBean.store(payload)
-                    .thenCompose(v -> vertx.eventBus().publisher(MyVerticle.ADDRESS).write(msg).toCompletionStage());
-        } else {
-            return dbBean.store(payload);
-        }
+        // dbBean.store(payload); --> blocking operations.
+        // return message.ack();
+        return dbBean.store(payload)
+                .thenCompose(v -> message.ack())
+                .thenCompose(v -> {
+                    if (payload.getMessage().contains("Vertx")) {
+                        return vertx.eventBus().publisher(MyVerticle.ADDRESS).write(msg).toCompletionStage();
+                    }
+                    return CompletableFuture.completedFuture(null);
+                });
     }
 
     public Publisher<TimedEntry> getPublisher() {
