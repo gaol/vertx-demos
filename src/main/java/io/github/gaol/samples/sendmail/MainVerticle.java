@@ -22,7 +22,6 @@ public class MainVerticle extends AbstractVerticle {
   public void start(Promise<Void> startPromise) throws Exception {
     router = Router.router(vertx);
     router.route("/sendmail").handler(this::sendmail);
-    router.route("/sendmailb").handler(this::sendmailb);
     mailClientVerticle = new MailClientVerticle();
     vertx.deployVerticle(SendMailVerticle.class, new DeploymentOptions().setInstances(8), did -> {
       if (did.succeeded()) {

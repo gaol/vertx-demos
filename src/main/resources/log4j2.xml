@@ -24,6 +24,9 @@
     <Logger name="io.netty" level="info" additivity="false">
       <AppenderRef ref="STDOUT" level="info" />
     </Logger>
+    <Logger name="sun.reflect" level="error" additivity="false">
+      <AppenderRef ref="STDOUT" level="error" />
+    </Logger>
     <Logger name="io.vertx" level="info" additivity="false">
       <AppenderRef ref="STDOUT" level="info" />
     </Logger>
