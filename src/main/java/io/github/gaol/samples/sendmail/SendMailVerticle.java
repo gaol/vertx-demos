@@ -3,6 +3,8 @@ package io.github.gaol.samples.sendmail;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mail.MailClient;
 import io.vertx.ext.mail.MailConfig;
@@ -14,12 +16,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class SendMailVerticle extends AbstractVerticle {
   private MailClient mailClient;
-  private final static Logger logger = Logger.getLogger("SendMailVerticle");
+  private final static Logger logger = LoggerFactory.getLogger("SendMailVerticle");
 
   // sent emails group by event loop
   private static final Map<Thread, AtomicInteger> sentMails = new ConcurrentHashMap<>();
@@ -43,7 +43,7 @@ public class SendMailVerticle extends AbstractVerticle {
       .setPassword("testa");
     mailClient = MailClient.createShared(vertx, mailConfig);
 
-    logger.info("SendMailVerticle deployed on thread: " + Thread.currentThread());
+    logger.info("SendMailVerticle deployed");
     vertx.eventBus().<JsonObject>consumer("mail.sent", m -> {
       JsonObject body = m.body();
       AtomicInteger total = new AtomicInteger(1);
@@ -59,11 +59,11 @@ public class SendMailVerticle extends AbstractVerticle {
       .setSubject(body.getString("subject", "test email subject"))
       ;
       final Thread t1 = Thread.currentThread();
-      logger.info("Current Context outside of mailClient.sentMail(): " + Vertx.currentContext());
+//      logger.info("Current Context outside of mailClient.sentMail(): " + Vertx.currentContext());
       mailClient.sendMail(message, r -> {
-        logger.info("Current Context inside of mailClient.sentMail(): " + Vertx.currentContext());
+//        logger.info("Current Context inside of mailClient.sentMail(): " + Vertx.currentContext());
         Thread t2 = Thread.currentThread();
-        logger.info("t1: " + t1 + ", t2: " + t2);
+//        logger.info("t1: " + t1 + ", t2: " + t2);
         if (!t1.equals(t2)) {
           logger.info("Current Context Is Wrong: " + i);
           throw new IllegalStateException("context wrong !!!!!!!!!!!!!!!!!!!!!!!!");
@@ -81,7 +81,7 @@ public class SendMailVerticle extends AbstractVerticle {
             printStatistics(total.get());
           }
         } else {
-          logger.log(Level.WARNING, "Failed to send email.", r.cause());
+          logger.warn("Failed to send email.", r.cause());
           r.cause().printStackTrace();
         }
       });

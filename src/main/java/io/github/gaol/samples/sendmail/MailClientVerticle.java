@@ -1,20 +1,14 @@
 package io.github.gaol.samples.sendmail;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Vertx;
-import io.vertx.core.impl.ContextInternal;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.mail.MailClient;
 import io.vertx.ext.mail.MailConfig;
-import io.vertx.ext.mail.MailMessage;
-
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MailClientVerticle extends AbstractVerticle {
   MailClient mailClient;
-  private final static Logger logger = Logger.getLogger("MailClientVerticle");
+  private final static Logger logger = LoggerFactory.getLogger("MailClientVerticle");
 
   @Override
   public void start() {

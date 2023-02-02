@@ -15,7 +15,7 @@
   <packaging>jar</packaging>
 
   <properties>
-    <vertx.version>4.3.5-SNAPSHOT</vertx.version>
+    <vertx.version>4.3.6</vertx.version>
     <vertx-maven-plugin.version>1.0.18</vertx-maven-plugin.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>

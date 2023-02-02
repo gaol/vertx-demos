@@ -4,28 +4,26 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mail.MailMessage;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Logger;
+
 
 public class MainVerticle extends AbstractVerticle {
-
-  private final static Logger logger = Logger.getLogger("MainVerticle");
-
+  private final static Logger logger = LoggerFactory.getLogger("MainVerticle");
   private Router router;
   private MailClientVerticle mailClientVerticle;
-
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
     router = Router.router(vertx);
     router.route("/sendmail").handler(this::sendmail);
     router.route("/sendmailb").handler(this::sendmailb);
     mailClientVerticle = new MailClientVerticle();
-    //vertx.deployVerticle(mailClientVerticle);
     vertx.deployVerticle(SendMailVerticle.class, new DeploymentOptions().setInstances(8), did -> {
       if (did.succeeded()) {
         vertx.createHttpServer()
@@ -46,11 +44,6 @@ public class MainVerticle extends AbstractVerticle {
   }
 
   private void sendmail(RoutingContext ctx) {
-    if ("1".equals(ctx.request().getParam("reset"))) {
-      SendMailVerticle.clearStatistics();
-      ctx.end("statistics reset");
-      return;
-    }
     JsonObject m = new JsonObject()
       .put("total", ctx.request().getParam("total"))
       .put("subject", ctx.request().getParam("subject"))
