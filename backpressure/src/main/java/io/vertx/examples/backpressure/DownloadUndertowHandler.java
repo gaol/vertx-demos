@@ -24,13 +24,12 @@ import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FilterInputStream;
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static io.vertx.examples.backpressure.Main.CHUNK_SIZE;
 import static io.vertx.examples.backpressure.Main.MESSAGE_ADDR;
@@ -43,7 +42,6 @@ public class DownloadUndertowHandler implements HttpHandler {
     private static final Logger logger = LoggerFactory.getLogger("Undertow-Download-Handler");
 
     private final long fileSize;
-
     {
         try {
             fileSize = Files.size(Main.DOWNLOAD_FILE_PATH);
@@ -60,56 +58,34 @@ public class DownloadUndertowHandler implements HttpHandler {
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
         logger.info("Starting Download the large file using blocking I/O.");
+        final AtomicLong totalRead = new AtomicLong(0);
+        final AtomicLong totalWritten = new AtomicLong(0);
         exchange.getResponseHeaders()
                 .put(Headers.CONTENT_TYPE, "application/octet-stream")
                 .put(Headers.CACHE_CONTROL, "no-cache");
-        try (InputStream input = fileInputStream();
-             OutputStream output = httpOutStream(exchange)) {
+        try (InputStream input = Files.newInputStream(Main.DOWNLOAD_FILE_PATH, StandardOpenOption.READ);
+             OutputStream output = exchange.getOutputStream()) {
             // small buffer to simulate the stream clearly
             byte[] buffer = new byte[CHUNK_SIZE];
             int len;
-            while ((len = input.read(buffer)) > 0) {
+            while ((len = input.read(buffer)) != -1) {
+                noticeAction("read", totalRead.addAndGet(len));
                 // it blocks when data has been not flushed to remote
                 output.write(buffer, 0, len);
+                output.flush();
+                noticeAction("write", totalWritten.addAndGet(len));
             }
         } catch (IOException e) {
             e.printStackTrace();
             throw e;
         }
         logger.info("Blocking I/O downloaded");
+        logger.info("Total Read: " + totalRead.get() + " bytes");
+        logger.info("Total Written: " + totalWritten.get() + " bytes");
     }
 
-    private OutputStream httpOutStream(HttpServerExchange exchange) {
-        return new FilterOutputStream(exchange.getOutputStream()) {
-            @Override
-            public void write(byte[] b, int off, int len) throws IOException {
-                super.write(b, off, len);
-                vertx.eventBus().publish(MESSAGE_ADDR, new JsonObject().put("update", len).put("fileSize", fileSize));
-            }
-        };
-    }
-
-    private InputStream fileInputStream() throws IOException {
-        logger.info("Trying to download File: " + Main.DOWNLOAD_FILE_PATH);
-        return new FilterInputStream(Files.newInputStream(Main.DOWNLOAD_FILE_PATH, StandardOpenOption.READ)) {
-            @Override
-            public int read() throws IOException {
-                int r = super.read();
-                if (r > 0) {
-                    vertx.eventBus().publish(MESSAGE_ADDR, new JsonObject().put("update", -r).put("fileSize", fileSize));
-                }
-                return r;
-            }
-
-            @Override
-            public int read(byte[] b, int off, int len) throws IOException {
-                int r = super.read(b, off, len);
-                if (r > 0) {
-                    vertx.eventBus().publish(MESSAGE_ADDR, new JsonObject().put("update", -r).put("fileSize", fileSize));
-                }
-                return r;
-            }
-        };
+    private void noticeAction(String action, long len) {
+        vertx.eventBus().publish(MESSAGE_ADDR, new JsonObject().put(action, len).put("fileSize", fileSize));
     }
 
 }

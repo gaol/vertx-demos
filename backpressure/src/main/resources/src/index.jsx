@@ -19,12 +19,14 @@ class Circle extends React.Component {
           width: this.props.radius,
           height: this.props.radius,
           borderRadius: this.props.radius/2,
+          margin: "auto"
         };
       return (
         <div style={circleStyle} />
       );
     }
 }
+
 
 class APP extends React.Component {
 
@@ -43,21 +45,20 @@ class APP extends React.Component {
     }
     let body = msg["body"];
     let fileSize = body["fileSize"];
-    let delta = body["update"];
-    let chunk = Math.abs(delta); // absolute delta value
+    let newBuffers = this.state.buffers;
     let newReadBuffers = this.state.readBuffers;
-    if (delta > 0) {
-      newReadBuffers += chunk;
+    if (body["read"]) {
+      newReadBuffers = body["read"];
     }
     let newWrittenBuffers = this.state.writtenBuffers;
-    if (delta < 0) {
-      newWrittenBuffers += chunk;
+    if (body["write"]) {
+      newWrittenBuffers = body["write"];
     }
-    let newBuffers = this.state.buffers + delta;
-
-    let step = (maxRadius - baseRadius) * chunk / fileSize;
-    let newRadius = Math.min(Math.max(baseRadius, this.state.radius + step), maxRadius);
-    console.log("Step is: " + step + ", new Radius is: " + newRadius);
+    newBuffers = newReadBuffers - newWrittenBuffers;
+    console.log("newBuffers: " + newBuffers);
+    let step = (newBuffers / fileSize) * (maxRadius - baseRadius);
+    let newRadius = Math.min(Math.max(baseRadius, baseRadius + step), maxRadius);
+    console.log("Step is: " + step + ", new Radius is: " + newRadius + ", fileSize: " + fileSize);
     // set radius and color
     let color = "green";
     if (newRadius <= 200) {
@@ -82,18 +83,20 @@ class APP extends React.Component {
 
   render() {
       return (
-        <div className="container">
-          <h1>Demo of buffer size in server</h1>
-          <div className="center">
-           <Circle size={this.state.size} color={this.state.color} />
-          </div>
-          <div className="footer">
-            <span>Total buffers read to memory: {this.state.readSize} bytes</span>
-            <span>Total buffers written to remote: {this.state.writtenSize} bytes</span>
-            <div style="padding-left: 50%;">
-              Buffers in server currently: {this.state.len} bytes
+        <div className="app">
+            <div className="container">
+              <h1>Demo of buffer size in server</h1>
+              <div className="center">
+               <Circle radius={this.state.radius} color={this.state.color} />
+              </div>
             </div>
-          </div>
+            <div className="footer">
+              <span className="note">Total buffers read: {this.state.readBuffers} bytes</span>
+              <span className="note">Total buffers written: {this.state.writtenBuffers} bytes</span>
+              <div className="footer">
+                <span className="note">Buffers in server currently: {this.state.buffers} bytes</span>
+              </div>
+            </div>
         </div>
       );
   }

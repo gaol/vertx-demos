@@ -9,7 +9,7 @@
 
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && rm -rf webroot && mv build webroot"
+    "build": "react-scripts build && rm -rf webroot && cp -r build webroot && rm -rf build"
   },
   "eslintConfig": {
     "extends": "react-app"

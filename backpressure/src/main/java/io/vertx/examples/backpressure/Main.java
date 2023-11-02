@@ -16,7 +16,7 @@ public class Main {
     // large.bin is a big file with 549MB
     static final Path DOWNLOAD_FILE_PATH = Path.of(System.getProperty("download.file.path", System.getProperty("user.home") + "/large.bin"));
     static final String MESSAGE_ADDR = "buffer.update";
-    static final int CHUNK_SIZE = 2048;
+    static final int CHUNK_SIZE = 4096;
 
     public static void main(String[] args) {
         logger.info("Starting the Undertow server at port 8080 ...");

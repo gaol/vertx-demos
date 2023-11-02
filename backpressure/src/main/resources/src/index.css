@@ -7,19 +7,33 @@ body {
   padding-top: 200px;
 }
 
+.app {
+  width: 100%;
+  height: 800px;
+}
+
 .container {
   width: 800px;
-  height: 600px;
+  height: 700px;
   position: relative;
   border: 3px solid green;
 }
 
 .center {
-  padding-left: 50%;
-  padding-top: 200px;
+  height: 600px;
+  display: flex;
 }
 
 .footer {
-  padding-left: 50%;
   padding-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
 }
+
+span.note {
+  padding-left: 150px;
+}
+
+
+
