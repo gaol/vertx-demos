@@ -16,11 +16,12 @@ public class Main {
     // large.bin is a big file with 549MB
     static final Path DOWNLOAD_FILE_PATH = Path.of(System.getProperty("download.file.path", System.getProperty("user.home") + "/large.bin"));
     static final String MESSAGE_ADDR = "buffer.update";
-    static final int CHUNK_SIZE = 4096;
+    static final int CHUNK_SIZE = 1024;
 
     public static void main(String[] args) {
         logger.info("Starting the Undertow server at port 8080 ...");
         final Vertx vertx = Vertx.vertx();
+        vertx.exceptionHandler(t -> logger.error("Failed out in vertx global exception handler", t));
         Undertow server = Undertow.builder()
                 .addHttpListener(8080, "0.0.0.0")
                 .setHandler(new PathHandler().addPrefixPath("/download", new BlockingHandler(new DownloadUndertowHandler(vertx))))

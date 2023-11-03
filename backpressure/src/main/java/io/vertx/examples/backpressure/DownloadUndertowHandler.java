@@ -20,7 +20,6 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +28,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static io.vertx.examples.backpressure.Main.CHUNK_SIZE;
-import static io.vertx.examples.backpressure.Main.MESSAGE_ADDR;
 
 /**
  * @author <a href="mailto:aoingl@gmail.com">Lin Gao</a>
@@ -58,8 +55,7 @@ public class DownloadUndertowHandler implements HttpHandler {
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
         logger.info("Starting Download the large file using blocking I/O.");
-        final AtomicLong totalRead = new AtomicLong(0);
-        final AtomicLong totalWritten = new AtomicLong(0);
+        final EventBusNotification notification = new EventBusNotification(vertx, fileSize);
         exchange.getResponseHeaders()
                 .put(Headers.CONTENT_TYPE, "application/octet-stream")
                 .put(Headers.CACHE_CONTROL, "no-cache");
@@ -69,23 +65,19 @@ public class DownloadUndertowHandler implements HttpHandler {
             byte[] buffer = new byte[CHUNK_SIZE];
             int len;
             while ((len = input.read(buffer)) != -1) {
-                noticeAction("read", totalRead.addAndGet(len));
+                notification.notice(len, 0);
                 // it blocks when data has been not flushed to remote
                 output.write(buffer, 0, len);
                 output.flush();
-                noticeAction("write", totalWritten.addAndGet(len));
+                notification.notice(0, len);
             }
         } catch (IOException e) {
             e.printStackTrace();
             throw e;
         }
         logger.info("Blocking I/O downloaded");
-        logger.info("Total Read: " + totalRead.get() + " bytes");
-        logger.info("Total Written: " + totalWritten.get() + " bytes");
-    }
-
-    private void noticeAction(String action, long len) {
-        vertx.eventBus().publish(MESSAGE_ADDR, new JsonObject().put(action, len).put("fileSize", fileSize));
+        logger.info("Total Read: " + notification.getTotalRead() + " bytes");
+        logger.info("Total Written: " + notification.getTotalWritten() + " bytes");
     }
 
 }

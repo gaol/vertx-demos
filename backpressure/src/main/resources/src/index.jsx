@@ -44,21 +44,12 @@ class APP extends React.Component {
       return;
     }
     let body = msg["body"];
+    let newReadBuffers = body["read"];
+    let newWrittenBuffers = body["write"];
+    let newBuffers = body["buffers"]
     let fileSize = body["fileSize"];
-    let newBuffers = this.state.buffers;
-    let newReadBuffers = this.state.readBuffers;
-    if (body["read"]) {
-      newReadBuffers = body["read"];
-    }
-    let newWrittenBuffers = this.state.writtenBuffers;
-    if (body["write"]) {
-      newWrittenBuffers = body["write"];
-    }
-    newBuffers = newReadBuffers - newWrittenBuffers;
-    console.log("newBuffers: " + newBuffers);
     let step = (newBuffers / fileSize) * (maxRadius - baseRadius);
     let newRadius = Math.min(Math.max(baseRadius, baseRadius + step), maxRadius);
-    console.log("Step is: " + step + ", new Radius is: " + newRadius + ", fileSize: " + fileSize);
     // set radius and color
     let color = "green";
     if (newRadius <= 200) {
