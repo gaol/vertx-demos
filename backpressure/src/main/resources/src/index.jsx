@@ -1,5 +1,7 @@
 import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import HighchartsReact from 'highcharts-react-official';
+import Highcharts from 'highcharts';
 
 import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -27,6 +29,13 @@ class Circle extends React.Component {
     }
 }
 
+// class LineChart extends Component {
+//   constructor(props) {
+//     super(props);
+//
+//   }
+//
+// }
 
 class APP extends React.Component {
 
@@ -44,6 +53,7 @@ class APP extends React.Component {
       return;
     }
     let body = msg["body"];
+    console.log("message body: " + JSON.stringify(body));
     let newReadBuffers = body["read"];
     let newWrittenBuffers = body["write"];
     let newBuffers = body["buffers"]

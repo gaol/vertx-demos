@@ -37,16 +37,6 @@ import static io.vertx.examples.backpressure.Main.CHUNK_SIZE;
 public class DownloadUndertowHandler implements HttpHandler {
 
     private static final Logger logger = LoggerFactory.getLogger("Undertow-Download-Handler");
-
-    private final long fileSize;
-    {
-        try {
-            fileSize = Files.size(Main.DOWNLOAD_FILE_PATH);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private final Vertx vertx;
     DownloadUndertowHandler(Vertx vertx) {
         this.vertx = vertx;
@@ -55,7 +45,7 @@ public class DownloadUndertowHandler implements HttpHandler {
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
         logger.info("Starting Download the large file using blocking I/O.");
-        final EventBusNotification notification = new EventBusNotification(vertx, fileSize);
+        final EventBusNotification notification = new EventBusNotification(vertx, Main.getFileSize());
         exchange.getResponseHeaders()
                 .put(Headers.CONTENT_TYPE, "application/octet-stream")
                 .put(Headers.CACHE_CONTROL, "no-cache");

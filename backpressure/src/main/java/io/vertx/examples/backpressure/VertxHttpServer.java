@@ -19,6 +19,8 @@ package io.vertx.examples.backpressure;
 import io.undertow.util.Headers;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.file.AsyncFile;
+import io.vertx.core.file.OpenOptions;
 import io.vertx.ext.bridge.PermittedOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -66,12 +68,50 @@ public class VertxHttpServer extends AbstractVerticle {
                     }
                     logger.info("VertxHttpServer deployed!");
                 });
-        router.get("/download").handler(this::download);
-        router.get("/download-fix").handler(this::downloadFix);
+        router.get("/nio/download").handler(this::download);
+        router.get("/nio/download-fix").handler(this::downloadFix);
     }
 
+    /**
+     * download but having back pressure issue
+     */
     private void download(RoutingContext ctx) {
-        // download but having back pressure issue
+        logger.info("\nStarting Download the large file using non-blocking I/O with issues.");
+        final EventBusNotification notification = new EventBusNotification(vertx, Main.getFileSize());
+        vertx.fileSystem().open(Main.DOWNLOAD_FILE_PATH.toAbsolutePath().toString(), new OpenOptions().setRead(true), ar -> {
+            if (ar.succeeded()) {
+                AsyncFile file = ar.result();
+                ctx.response().setChunked(true)
+                        .setStatusCode(200)
+                        .putHeader("Content-Type", "application/octet-stream")
+                        .putHeader("Cache-Control", "no-cache")
+                ;
+                file.handler(buffer -> {
+                    final int len = buffer.length();
+                    notification.notice(len, 0);
+                    ctx.response().write(buffer, h -> {
+                        if (h.succeeded()) {
+//                            vertx.setTimer(500, l -> notification.notice(0, len));
+//                            logger.info("Notice write len: " + len + " bytes");
+                            notification.notice(0, len);
+                        } else {
+                            h.cause().printStackTrace();
+                            ctx.fail(h.cause());
+                        }
+                    });
+                })
+                    .exceptionHandler(ctx::fail)
+                    .endHandler(h -> {
+                        ctx.end();
+                        logger.info("Non-Blocking I/O downloaded");
+                        logger.info("Total Read(Nio): " + notification.getTotalRead() + " bytes");
+                        logger.info("Total Written(Nio): " + notification.getTotalWritten() + " bytes\n");
+                })
+                ;
+            } else {
+                ctx.fail(ar.cause());
+            }
+        });
     }
 
     private void downloadFix(RoutingContext ctx) {
