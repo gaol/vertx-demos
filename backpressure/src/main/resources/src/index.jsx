@@ -11,8 +11,8 @@ import EventBus from "@vertx/eventbus-bridge-client.js"
 const eb = new EventBus("http://localhost:8000/eventbus");
 eb.enableReconnect(true);
 
-const baseRadius = 50;
-const maxRadius = 600;
+const baseRadius = 20;
+const maxRadius = 400;
 
 class Circle extends React.Component {
     render() {
@@ -29,19 +29,63 @@ class Circle extends React.Component {
     }
 }
 
-// class LineChart extends Component {
-//   constructor(props) {
-//     super(props);
-//
-//   }
-//
-// }
+class LineChart extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      chartOptions: {
+        title: {
+          text: "Buffers Usage In Memory"
+        },
+        xAxis: {
+          type: 'line',
+          title: {
+            text: "Times"
+          }
+        },
+        yAxis: {
+          title: {
+            text: "Buffers In Memory"
+          }
+        },
+        series: [
+            {
+              name: "In Memory",
+              data: []
+            }
+        ]
+      }
+    };
+    this.addNewPoint = this.addNewPoint.bind(this);
+    window.chart = this;
+  }
+
+  addNewPoint(err, msg) {
+    if (err) {
+      console.log("Failed with error: " + err);
+      return;
+    }
+    let body = msg["body"];
+    let inMemory = body["buffers"];
+    let times = body["times"] / 2;
+    let inMemorySeries = {name: "In Memory", data: [...this.state.chartOptions.series[0].data, {x: times, y: inMemory}]};
+    let newChartOptions = {...this.state.chartOptions, series: [inMemorySeries]};
+    this.setState({chartOptions: newChartOptions});
+  }
+
+  render() {
+    return (
+      <HighchartsReact highcharts={Highcharts} options={this.state.chartOptions} />
+    );
+  }
+
+}
 
 class APP extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {radius: 50, color: "green", readBuffers: 0, writtenBuffers: 0, buffers: 0}
+    this.state = {radius: 20, color: "green", readBuffers: 0, writtenBuffers: 0, buffers: 0}
     this.updateSize = this.updateSize.bind(this);
     window.app = this;
   }
@@ -53,7 +97,6 @@ class APP extends React.Component {
       return;
     }
     let body = msg["body"];
-    console.log("message body: " + JSON.stringify(body));
     let newReadBuffers = body["read"];
     let newWrittenBuffers = body["write"];
     let newBuffers = body["buffers"]
@@ -62,9 +105,9 @@ class APP extends React.Component {
     let newRadius = Math.min(Math.max(baseRadius, baseRadius + step), maxRadius);
     // set radius and color
     let color = "green";
-    if (newRadius <= 200) {
+    if (newRadius <= 100) {
       color = "green";
-    } else if (newRadius > 200 && newRadius < 400) {
+    } else if (newRadius > 100 && newRadius < 250) {
       color = "orange";
     } else {
       color = "red";
@@ -77,6 +120,7 @@ class APP extends React.Component {
       console.log("Connected to the event bus");
       eb.registerHandler("buffer.update", function (err, msg) {
         window.app.updateSize(err, msg);
+        window.chart.addNewPoint(err, msg);
       });
       console.log("vertx eventbus handler registered! ");
     };
@@ -85,23 +129,39 @@ class APP extends React.Component {
   render() {
       return (
         <div className="app">
-            <div className="container">
-              <h1>Demo of buffer size in server</h1>
-              <div className="center">
-               <Circle radius={this.state.radius} color={this.state.color} />
-              </div>
-            </div>
-            <div className="footer">
-              <span className="note">Total buffers read: {this.state.readBuffers} bytes</span>
-              <span className="note">Total buffers written: {this.state.writtenBuffers} bytes</span>
-              <div className="footer">
-                <span className="note">Buffers in server currently: {this.state.buffers} bytes</span>
-              </div>
-            </div>
+          <table>
+            <caption className="caption">
+              Demo of buffer size in server
+            </caption>
+            <tbody>
+              <tr>
+                <td>
+                    <div className="circle">
+                      <div className="center">
+                         <Circle radius={this.state.radius} color={this.state.color} />
+                      </div>
+                    </div>
+                </td>
+                <td>
+                    <div className="chart"><LineChart /></div>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2">
+                  <div className="footer">
+                    <span className="note">Total read: {this.state.readBuffers} bytes</span>
+                    <span className="note">Total written: {this.state.writtenBuffers} bytes</span>
+                    <span className="note">Buffers in memory: {this.state.buffers} bytes</span>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
       );
   }
-
 }
 
 const root = createRoot(document.getElementById('root'));

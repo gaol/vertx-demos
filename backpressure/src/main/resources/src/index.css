@@ -4,36 +4,63 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  padding-top: 80px;
+  padding-top: 20px;
 }
 
 .app {
   width: 100%;
   height: 800px;
+  box-sizing: content-box;
+  margin-left: 30px;
 }
 
-.container {
-  width: 800px;
-  height: 700px;
+.caption {
+  padding: 10px 10px 10px 40px;
+  caption-side: top;
+  font-weight: bold;
+  color: #000000;
+}
+
+table {
+  border-collapse: collapse;
+
+}
+
+.circle {
+  width: 400px;
+  height: 400px;
+  max-width: 400px;
+  max-height: 400px;
   position: relative;
-  border: 3px solid green;
+  border: 2px solid green;
+  margin-left: 30px;
+  margin-top: 20px;
+}
+
+.chart {
+  height: 400px;
+  width: 100%;
+  position: relative;
+  border: 1px solid blue;
+  margin-top: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
+  box-sizing: content-box;
+  min-width: 800px;
 }
 
 .center {
-  height: 600px;
+  height: 400px;
   display: flex;
 }
 
 .footer {
-  padding-top: 20px;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
+    margin-top: 20px;
+	background-color: #EEE;
+	font-weight: bold;
 }
 
-span.note {
+.note {
   padding-left: 150px;
 }
-
-
 

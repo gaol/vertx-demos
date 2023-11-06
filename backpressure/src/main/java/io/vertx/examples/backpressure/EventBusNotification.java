@@ -20,6 +20,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static io.vertx.examples.backpressure.Main.MESSAGE_ADDR;
@@ -33,6 +34,7 @@ public class EventBusNotification {
     private final AtomicLong totalRead = new AtomicLong(0);
     private final AtomicLong totalWritten = new AtomicLong(0);
     private final AtomicLong buffersInMemory = new AtomicLong(0);
+    private final AtomicInteger times = new AtomicInteger(0);
     private final Context ctx;
 
     public EventBusNotification(Vertx vertx, long fileSize) {
@@ -46,6 +48,7 @@ public class EventBusNotification {
                 .put("write", totalWritten.addAndGet(writeLen))
                 .put("read", totalRead.addAndGet(readLen))
                 .put("buffers", buffersInMemory.addAndGet((readLen - writeLen)))
+                .put("times", times.incrementAndGet())
                 .put("fileSize", fileSize)));
     }
 
