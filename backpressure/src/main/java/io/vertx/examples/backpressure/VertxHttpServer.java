@@ -32,6 +32,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.vertx.examples.backpressure.Main.CHUNK_SIZE;
 import static io.vertx.examples.backpressure.Main.MESSAGE_ADDR;
 
 /**
@@ -83,6 +84,7 @@ public class VertxHttpServer extends AbstractVerticle {
         vertx.fileSystem().open(Main.DOWNLOAD_FILE_PATH.toAbsolutePath().toString(), new OpenOptions(), ar -> {
             if (ar.succeeded()) {
                 AsyncFile file = ar.result();
+                file.setReadBufferSize(CHUNK_SIZE);
                 file.handler(buffer -> {
                     notification.notice(buffer.length(), 0);
                     ctx.response().write(buffer, h -> {
@@ -116,6 +118,33 @@ public class VertxHttpServer extends AbstractVerticle {
     }
 
     private void downloadFix(RoutingContext ctx) {
-        // download with the back pressure fixed
+        logger.info("\nStarting Download the large file using non-blocking I/O with the fix.");
+        setRespHeaders(ctx);
+        ctx.response().setWriteQueueMaxSize(CHUNK_SIZE);
+        final EventBusNotification notification = new EventBusNotification(vertx, Main.getFileSize());
+        vertx.fileSystem().open(Main.DOWNLOAD_FILE_PATH.toAbsolutePath().toString(), new OpenOptions(), ar -> {
+            if (ar.succeeded()) {
+                AsyncFile file = ar.result();
+                file.setReadBufferSize(CHUNK_SIZE);
+                file.handler(buffer -> {
+                            notification.notice(buffer.length(), 0);
+                            ctx.response().write(buffer, h -> {
+                                if (h.succeeded()) {
+                                    notification.notice(0, buffer.length());
+                                } else {
+                                    ctx.fail(h.cause());
+                                }
+                            });
+                            if (ctx.response().writeQueueFull()) {
+                                file.pause();
+                                ctx.response().drainHandler(v -> file.resume());
+                            }
+                        })
+                        .exceptionHandler(ctx::fail)
+                        .endHandler(h -> endNio(ctx, notification));
+            } else {
+                ctx.fail(ar.cause());
+            }
+        });
     }
 }
