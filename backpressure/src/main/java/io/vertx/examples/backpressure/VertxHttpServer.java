@@ -18,10 +18,10 @@ package io.vertx.examples.backpressure;
 
 import io.undertow.util.Headers;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.file.AsyncFile;
 import io.vertx.core.file.OpenOptions;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.bridge.PermittedOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -72,6 +72,22 @@ public class VertxHttpServer extends AbstractVerticle {
                 });
         router.get("/nio/download").handler(this::download);
         router.get("/nio/download-fix").handler(this::downloadFix);
+        router.get("/nio/download-fix2").handler(this::downloadFix2);
+    }
+
+    private void setRespHeaders(RoutingContext ctx) {
+        ctx.response().setChunked(true)
+                .setWriteQueueMaxSize(CHUNK_SIZE)
+                .setStatusCode(200)
+                .putHeader("Content-Type", "application/octet-stream")
+                .putHeader("Cache-Control", "no-cache");
+    }
+
+    private void endNio(RoutingContext ctx, EventBusNotification notification) {
+        ctx.end();
+        logger.info("Non-Blocking I/O downloaded");
+        logger.info("Total Read(Nio): " + notification.getTotalRead() + " bytes");
+        logger.info("Total Written(Nio): " + notification.getTotalWritten() + " bytes\n");
     }
 
     /**
@@ -83,8 +99,7 @@ public class VertxHttpServer extends AbstractVerticle {
         final EventBusNotification notification = new EventBusNotification(vertx, Main.getFileSize());
         vertx.fileSystem().open(Main.DOWNLOAD_FILE_PATH.toAbsolutePath().toString(), new OpenOptions(), ar -> {
             if (ar.succeeded()) {
-                AsyncFile file = ar.result();
-                file.setReadBufferSize(CHUNK_SIZE);
+                AsyncFile file = ar.result().setReadBufferSize(CHUNK_SIZE);
                 file.handler(buffer -> {
                     notification.notice(buffer.length(), 0);
                     ctx.response().write(buffer, h -> {
@@ -103,29 +118,17 @@ public class VertxHttpServer extends AbstractVerticle {
         });
     }
 
-    private void setRespHeaders(RoutingContext ctx) {
-        ctx.response().setChunked(true)
-            .setStatusCode(200)
-            .putHeader("Content-Type", "application/octet-stream")
-            .putHeader("Cache-Control", "no-cache");
-    }
-
-    private void endNio(RoutingContext ctx, EventBusNotification notification) {
-        ctx.end();
-        logger.info("Non-Blocking I/O downloaded");
-        logger.info("Total Read(Nio): " + notification.getTotalRead() + " bytes");
-        logger.info("Total Written(Nio): " + notification.getTotalWritten() + " bytes\n");
-    }
-
+    /**
+     * download with the back pressure issue fixed by checking if write queue is full
+     */
     private void downloadFix(RoutingContext ctx) {
         logger.info("\nStarting Download the large file using non-blocking I/O with the fix.");
         setRespHeaders(ctx);
-        ctx.response().setWriteQueueMaxSize(CHUNK_SIZE);
         final EventBusNotification notification = new EventBusNotification(vertx, Main.getFileSize());
         vertx.fileSystem().open(Main.DOWNLOAD_FILE_PATH.toAbsolutePath().toString(), new OpenOptions(), ar -> {
             if (ar.succeeded()) {
-                AsyncFile file = ar.result();
-                file.setReadBufferSize(CHUNK_SIZE);
+                AsyncFile file = ar.result().setReadBufferSize(CHUNK_SIZE);
+                Handler<Void> drainHandler = v -> file.resume();
                 file.handler(buffer -> {
                             notification.notice(buffer.length(), 0);
                             ctx.response().write(buffer, h -> {
@@ -137,7 +140,7 @@ public class VertxHttpServer extends AbstractVerticle {
                             });
                             if (ctx.response().writeQueueFull()) {
                                 file.pause();
-                                ctx.response().drainHandler(v -> file.resume());
+                                ctx.response().drainHandler(drainHandler);
                             }
                         })
                         .exceptionHandler(ctx::fail)
@@ -147,4 +150,26 @@ public class VertxHttpServer extends AbstractVerticle {
             }
         });
     }
+
+
+    /**
+     * download with the back pressure issue fixed by using Pipe
+     */
+    private void downloadFix2(RoutingContext ctx) {
+        logger.info("\nStarting Download the large file using non-blocking I/O with the fix.");
+        setRespHeaders(ctx);
+        final EventBusNotification notification = new EventBusNotification(vertx, Main.getFileSize());
+        vertx.fileSystem().open(Main.DOWNLOAD_FILE_PATH.toAbsolutePath().toString(), new OpenOptions(), ar -> {
+            if (ar.succeeded()) {
+                ar.result()
+                    .setReadBufferSize(CHUNK_SIZE)
+                    .exceptionHandler(ctx::fail)
+                    .endHandler(h -> endNio(ctx, notification))
+                    .pipeTo(ctx.response());
+            } else {
+                ctx.fail(ar.cause());
+            }
+        });
+    }
+
 }
