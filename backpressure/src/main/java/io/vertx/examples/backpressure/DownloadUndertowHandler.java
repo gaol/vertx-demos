@@ -67,7 +67,7 @@ public class DownloadUndertowHandler implements HttpHandler {
         }
         logger.info("Blocking I/O downloaded");
         logger.info("Total Read: " + notification.getTotalRead() + " bytes");
-        logger.info("Total Written: " + notification.getTotalWritten() + " bytes");
+        logger.info("Total Written: " + notification.getTotalWritten() + " bytes\n");
     }
 
 }
