@@ -35,7 +35,7 @@ class LineChart extends React.Component {
     this.state = {
       chartOptions: {
         title: {
-          text: "Buffers Usage In Memory"
+          text: "Buffers In Memory For Downloading"
         },
         xAxis: {
           type: 'line',
@@ -131,7 +131,7 @@ class APP extends React.Component {
         <div className="app">
           <table>
             <caption className="caption">
-              Demo of buffer size in server
+              Demo of buffer size used when downloading a big file
             </caption>
             <tbody>
               <tr>
