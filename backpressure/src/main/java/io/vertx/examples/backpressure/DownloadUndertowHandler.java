@@ -38,14 +38,16 @@ public class DownloadUndertowHandler implements HttpHandler {
 
     private static final Logger logger = LoggerFactory.getLogger("Undertow-Download-Handler");
     private final Vertx vertx;
-    DownloadUndertowHandler(Vertx vertx) {
+    private final long fileSize;
+    DownloadUndertowHandler(Vertx vertx, long fileSize) {
         this.vertx = vertx;
+        this.fileSize = fileSize;
     }
 
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
         logger.info("Starting Download the large file using blocking I/O.");
-        final EventBusNotification notification = new EventBusNotification(vertx, Main.getFileSize());
+        final EventBusNotification notification = new EventBusNotification(vertx, fileSize);
         exchange.getResponseHeaders()
                 .put(Headers.CONTENT_TYPE, "application/octet-stream")
                 .put(Headers.CACHE_CONTROL, "no-cache");

@@ -29,6 +29,8 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
+import io.vertx.rxjava3.core.buffer.Buffer;
+import org.reactivestreams.Subscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +42,13 @@ import static io.vertx.examples.backpressure.Main.MESSAGE_ADDR;
  */
 public class VertxHttpServer extends AbstractVerticle {
     private static final Logger logger = LoggerFactory.getLogger("VertxHttpServer");
+
+    private final io.vertx.rxjava3.core.Vertx rxVertx;
+    private final long fileSize;
+    public VertxHttpServer(io.vertx.rxjava3.core.Vertx rxVertx, long fileSize) {
+        this.rxVertx = rxVertx;
+        this.fileSize = fileSize;
+    }
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
@@ -73,6 +82,8 @@ public class VertxHttpServer extends AbstractVerticle {
         router.get("/nio/download").handler(this::download);
         router.get("/nio/download-fix").handler(this::downloadFix);
         router.get("/nio/download-fix2").handler(this::downloadFix2);
+        io.vertx.rxjava3.ext.web.Router rxRouter = io.vertx.rxjava3.ext.web.Router.newInstance(router);
+        rxRouter.get("/nio/download-rx").handler(this::downloadFixRx);
     }
 
     private void setRespHeaders(RoutingContext ctx) {
@@ -96,7 +107,7 @@ public class VertxHttpServer extends AbstractVerticle {
     private void download(RoutingContext ctx) {
         logger.info("\nStarting Download the large file using non-blocking I/O with issues.");
         setRespHeaders(ctx);
-        final EventBusNotification notification = new EventBusNotification(vertx, Main.getFileSize());
+        final EventBusNotification notification = new EventBusNotification(vertx, this.fileSize);
         vertx.fileSystem().open(Main.DOWNLOAD_FILE_PATH.toAbsolutePath().toString(), new OpenOptions(), ar -> {
             if (ar.succeeded()) {
                 AsyncFile file = ar.result().setReadBufferSize(CHUNK_SIZE);
@@ -124,7 +135,7 @@ public class VertxHttpServer extends AbstractVerticle {
     private void downloadFix(RoutingContext ctx) {
         logger.info("\nStarting Download the large file using non-blocking I/O with the fix.");
         setRespHeaders(ctx);
-        final EventBusNotification notification = new EventBusNotification(vertx, Main.getFileSize());
+        final EventBusNotification notification = new EventBusNotification(vertx, this.fileSize);
         vertx.fileSystem().open(Main.DOWNLOAD_FILE_PATH.toAbsolutePath().toString(), new OpenOptions(), ar -> {
             if (ar.succeeded()) {
                 AsyncFile file = ar.result().setReadBufferSize(CHUNK_SIZE);
@@ -151,14 +162,13 @@ public class VertxHttpServer extends AbstractVerticle {
         });
     }
 
-
     /**
      * download with the back pressure issue fixed by using Pipe
      */
     private void downloadFix2(RoutingContext ctx) {
         logger.info("\nStarting Download the large file using non-blocking I/O with the fix.");
         setRespHeaders(ctx);
-        final EventBusNotification notification = new EventBusNotification(vertx, Main.getFileSize());
+        final EventBusNotification notification = new EventBusNotification(vertx, this.fileSize);
         vertx.fileSystem().open(Main.DOWNLOAD_FILE_PATH.toAbsolutePath().toString(), new OpenOptions(), ar -> {
             if (ar.succeeded()) {
                 ar.result()
@@ -170,6 +180,22 @@ public class VertxHttpServer extends AbstractVerticle {
                 ctx.fail(ar.cause());
             }
         });
+    }
+
+    /**
+     * download with the back pressure issue fixed by using rxjava3 based API
+     */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void downloadFixRx(io.vertx.rxjava3.ext.web.RoutingContext ctx) {
+        logger.info("\nStarting Download the large file using non-blocking I/O with the fix using rxjava3.");
+        setRespHeaders(ctx.getDelegate());
+        final Subscriber<Buffer> subscriber = ctx.response().setWriteQueueMaxSize(CHUNK_SIZE).toSubscriber()
+                .onWriteStreamError(ctx::fail)
+                .onWriteStreamEnd(ctx::end);
+        rxVertx.fileSystem()
+                .rxOpen(Main.DOWNLOAD_FILE_PATH.toAbsolutePath().toString(), new OpenOptions())
+                .flatMapPublisher(af -> af.setReadBufferSize(CHUNK_SIZE).toFlowable())
+                .subscribe(subscriber::onNext, subscriber::onError, subscriber::onComplete);
     }
 
 }
