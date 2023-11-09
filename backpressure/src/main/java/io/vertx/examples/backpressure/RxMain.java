@@ -33,7 +33,7 @@ public class RxMain {
         AtomicInteger got = new AtomicInteger();
         AtomicInteger dropped =new AtomicInteger();
         CountDownLatch latch = new CountDownLatch(1);
-        Flowable.intervalRange(1, 200, 1, 10, TimeUnit.MILLISECONDS)
+        Flowable.intervalRange(1, 100, 1, 10, TimeUnit.MILLISECONDS)
                 .onBackpressureBuffer(10, () -> {
                     System.out.println("Overflow");
                     dropped.incrementAndGet();
@@ -43,7 +43,7 @@ public class RxMain {
 //                    dropped.incrementAndGet();
 //                })
 //                .onBackpressureBuffer()
-                .observeOn(Schedulers.computation())
+                .observeOn(Schedulers.computation(), false, 20)
                 .subscribe(e -> {
                     TimeUnit.MILLISECONDS.sleep(50);
                     System.out.println("Got: " + e);
