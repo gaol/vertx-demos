@@ -34,6 +34,8 @@ import org.reactivestreams.Subscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
+
 import static io.vertx.examples.backpressure.Main.CHUNK_SIZE;
 import static io.vertx.examples.backpressure.Main.MESSAGE_ADDR;
 
@@ -45,9 +47,11 @@ public class VertxHttpServer extends AbstractVerticle {
 
     private final io.vertx.rxjava3.core.Vertx rxVertx;
     private final long fileSize;
-    public VertxHttpServer(io.vertx.rxjava3.core.Vertx rxVertx, long fileSize) {
+    private final Path downloadFile;
+    public VertxHttpServer(io.vertx.rxjava3.core.Vertx rxVertx, Path downloadFile, long fileSize) {
         this.rxVertx = rxVertx;
         this.fileSize = fileSize;
+        this.downloadFile = downloadFile;
     }
 
     @Override
@@ -108,7 +112,7 @@ public class VertxHttpServer extends AbstractVerticle {
         logger.info("\nStarting Download the large file using non-blocking I/O with issues.");
         setRespHeaders(ctx);
         final EventBusNotification notification = new EventBusNotification(vertx, this.fileSize);
-        vertx.fileSystem().open(Main.DOWNLOAD_FILE_PATH.toAbsolutePath().toString(), new OpenOptions(), ar -> {
+        vertx.fileSystem().open(downloadFile.toAbsolutePath().toString(), new OpenOptions(), ar -> {
             if (ar.succeeded()) {
                 AsyncFile file = ar.result().setReadBufferSize(CHUNK_SIZE);
                 file.handler(buffer -> {
@@ -136,7 +140,7 @@ public class VertxHttpServer extends AbstractVerticle {
         logger.info("\nStarting Download the large file using non-blocking I/O with the fix.");
         setRespHeaders(ctx);
         final EventBusNotification notification = new EventBusNotification(vertx, this.fileSize);
-        vertx.fileSystem().open(Main.DOWNLOAD_FILE_PATH.toAbsolutePath().toString(), new OpenOptions(), ar -> {
+        vertx.fileSystem().open(downloadFile.toAbsolutePath().toString(), new OpenOptions(), ar -> {
             if (ar.succeeded()) {
                 AsyncFile file = ar.result().setReadBufferSize(CHUNK_SIZE);
                 Handler<Void> drainHandler = v -> file.resume();
@@ -169,7 +173,7 @@ public class VertxHttpServer extends AbstractVerticle {
         logger.info("\nStarting Download the large file using non-blocking I/O with the fix.");
         setRespHeaders(ctx);
         final EventBusNotification notification = new EventBusNotification(vertx, this.fileSize);
-        vertx.fileSystem().open(Main.DOWNLOAD_FILE_PATH.toAbsolutePath().toString(), new OpenOptions(), ar -> {
+        vertx.fileSystem().open(downloadFile.toAbsolutePath().toString(), new OpenOptions(), ar -> {
             if (ar.succeeded()) {
                 ar.result()
                     .setReadBufferSize(CHUNK_SIZE)
@@ -193,7 +197,7 @@ public class VertxHttpServer extends AbstractVerticle {
                 .onWriteStreamError(ctx::fail)
                 .onWriteStreamEnd(ctx::end);
         rxVertx.fileSystem()
-                .rxOpen(Main.DOWNLOAD_FILE_PATH.toAbsolutePath().toString(), new OpenOptions())
+                .rxOpen(downloadFile.toAbsolutePath().toString(), new OpenOptions())
                 .flatMapPublisher(af -> af.setReadBufferSize(CHUNK_SIZE).toFlowable())
                 .subscribe(subscriber::onNext, subscriber::onError, subscriber::onComplete);
     }

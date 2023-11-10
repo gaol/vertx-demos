@@ -16,17 +16,19 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger("main");
 
     // large.bin is a big file with 549MB
-    static final Path DOWNLOAD_FILE_PATH = Path.of(System.getProperty("download.file.path", System.getProperty("user.home") + "/large.bin"));
     static final String MESSAGE_ADDR = "buffer.update";
     static final int CHUNK_SIZE = 8192;
 
     private final Long fileSize;
     private final Vertx vertx;
 
+    private final Path downloadFile;
+
     public Main() {
         this.vertx = Vertx.vertx();
+        this.downloadFile = Path.of(System.getProperty("download.file.path", System.getProperty("user.home") + "/large.bin"));
         try {
-            this.fileSize = Files.size(Main.DOWNLOAD_FILE_PATH);
+            this.fileSize = Files.size(this.downloadFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -43,13 +45,13 @@ public class Main {
         vertx.exceptionHandler(t -> logger.error("Failed out in vertx global exception handler", t));
         Undertow server = Undertow.builder()
                 .addHttpListener(8080, "0.0.0.0")
-                .setHandler(new PathHandler().addPrefixPath("/bio/download", new BlockingHandler(new DownloadUndertowHandler(vertx, getFileSize()))))
+                .setHandler(new PathHandler().addPrefixPath("/bio/download", new BlockingHandler(new DownloadUndertowHandler(vertx, getDownloadFile(), getFileSize()))))
                 .build();
         server.start();
         logger.info("Undertow server started!");
         logger.info("\t ======");
         logger.info("Starting Vertx instance for Non Blocking Downloader...");
-        vertx.deployVerticle(new VertxHttpServer(io.vertx.rxjava3.core.Vertx.newInstance(vertx), getFileSize())).onSuccess(s -> {
+        vertx.deployVerticle(new VertxHttpServer(io.vertx.rxjava3.core.Vertx.newInstance(vertx), getDownloadFile(), getFileSize())).onSuccess(s -> {
             logger.info("Download the file using blocking i/o at: http://localhost:8080/bio/download");
             logger.info("Download the file using non blocking i/o at: http://localhost:8000/nio/download");
             logger.info("Download the file using non blocking i/o with fix at: http://localhost:8000/nio/download-fix");
@@ -64,4 +66,7 @@ public class Main {
         return vertx;
     }
 
+    public Path getDownloadFile() {
+        return downloadFile;
+    }
 }

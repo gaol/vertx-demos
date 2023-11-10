@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import static io.vertx.examples.backpressure.Main.CHUNK_SIZE;
@@ -39,9 +40,11 @@ public class DownloadUndertowHandler implements HttpHandler {
     private static final Logger logger = LoggerFactory.getLogger("Undertow-Download-Handler");
     private final Vertx vertx;
     private final long fileSize;
-    DownloadUndertowHandler(Vertx vertx, long fileSize) {
+    private final Path downloadFile;
+    DownloadUndertowHandler(Vertx vertx, Path downloadFile, long fileSize) {
         this.vertx = vertx;
         this.fileSize = fileSize;
+        this.downloadFile = downloadFile;
     }
 
     @Override
@@ -51,7 +54,7 @@ public class DownloadUndertowHandler implements HttpHandler {
         exchange.getResponseHeaders()
                 .put(Headers.CONTENT_TYPE, "application/octet-stream")
                 .put(Headers.CACHE_CONTROL, "no-cache");
-        try (InputStream input = Files.newInputStream(Main.DOWNLOAD_FILE_PATH, StandardOpenOption.READ);
+        try (InputStream input = Files.newInputStream(downloadFile, StandardOpenOption.READ);
              OutputStream output = exchange.getOutputStream()) {
             // small buffer to simulate the stream clearly
             byte[] buffer = new byte[CHUNK_SIZE];
