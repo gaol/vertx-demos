@@ -38,9 +38,9 @@ class LineChart extends React.Component {
           text: "Buffers In Memory For Downloading"
         },
         xAxis: {
-          type: 'line',
+          type: 'datetime',
           title: {
-            text: "Times"
+            text: "Time"
           }
         },
         yAxis: {
@@ -68,7 +68,7 @@ class LineChart extends React.Component {
     let body = msg["body"];
     let inMemory = body["buffers"];
     let times = body["times"] / 2;
-    let inMemorySeries = {name: "In Memory", data: [...this.state.chartOptions.series[0].data, {x: times, y: inMemory}]};
+    let inMemorySeries = {name: "In Memory", data: [...this.state.chartOptions.series[0].data, inMemory]};
     let newChartOptions = {...this.state.chartOptions, series: [inMemorySeries]};
     this.setState({chartOptions: newChartOptions});
   }
