@@ -124,7 +124,7 @@ vertx.fileSystem().open(downloadFile.toAbsolutePath().toString(), new OpenOption
 ```
 We specify a handler to consume the content when AsyncFile starts reading the file. AsyncFile works in `flowing` mode, so it starts reading data and passing the data into the handler.
 
-![Memory usage using NIO](download_nio_no_bp.webm)
+![Memory usage using NIO](download-nio.gif)
 
 There is a peak memory usage which is above `500MB`, basically it reads all content from the file before it is able to write the content to the remote client. It is because the reading happens on the different thread than writing and there is no control over the speed.
 
