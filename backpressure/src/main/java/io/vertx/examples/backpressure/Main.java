@@ -55,7 +55,7 @@ public class Main {
             logger.info("Download the file using blocking i/o at: http://localhost:8080/bio/download");
             logger.info("Download the file using non blocking i/o at: http://localhost:8000/nio/download");
             logger.info("Download the file using non blocking i/o with fix at: http://localhost:8000/nio/download-fix");
-        });
+        }).onFailure(Throwable::printStackTrace);
     }
 
     public long getFileSize() {
