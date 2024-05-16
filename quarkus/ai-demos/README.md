@@ -2,7 +2,7 @@
 
 This is a Quarkus demo app, created using command:
 
-> quarkus create app --maven --java=17 --package-name=io.quarkus.demos.ai --extensions=langchain4j-ollama,langchain4j-openai,rest-client-reactive  io.quarkus.demos:ai-demos:0.0.1-SNAPSHOT
+> quarkus create app --maven --java=17 --package-name=io.quarkus.demos.ai --extensions=langchain4j-ollama,langchain4j-openai,quarkus-resteasy-reactive,uarkus-resteasy-reactive-jackson io.quarkus.demos:ai-demos:0.0.1-SNAPSHOT
 
 
 ## Running the application in dev mode
