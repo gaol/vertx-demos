@@ -20,7 +20,7 @@ diffusion_pipe = diffusion_pipe.to("cuda")  # Use GPU for faster inference
 
 # load the llama3 chat model
 llama3_path = f"{model_root_path}\\huggingface\\meta-llama"
-llama3_pipeline = pipeline("text-generation", model=llama3_path, model_kwargs={"torch_dtype": torch.bfloat16}).to("cuda")
+llama3_pipeline = pipeline("text-generation", model=llama3_path, model_kwargs={"torch_dtype": torch.bfloat16}, device="cuda")
 
 
 @app.route('/images/generations', methods=['POST'])
