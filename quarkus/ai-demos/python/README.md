@@ -35,3 +35,7 @@ So we only need to download the following files:
     ├── diffusion_pytorch_model.fp16.safetensors
 ```
 
+## An OpenAI compatible text generation API
+
+We use `meta-llama/Meta-Llama-3-8B` from hugging face for the text generation demo.
+
