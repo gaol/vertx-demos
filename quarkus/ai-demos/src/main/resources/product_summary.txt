@@ -1,0 +1,5 @@
+Extract information about a product from the summary delimited by --- below. When there is no components provided, it is set to an empty list. The response must contain only the JSON with product's data and without any other sentence.
+
+---
+{summary}
+---

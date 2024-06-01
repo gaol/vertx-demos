@@ -5,9 +5,9 @@ import dev.langchain4j.model.image.ImageModel;
 import io.quarkus.resteasy.reactive.jackson.CustomSerialization;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
@@ -15,9 +15,12 @@ import java.util.List;
 @Path("/llm")
 public class LLMResource {
 
-    // this should be the one to OpenAI
+    // the imageModel comes from
     @Inject
     private ImageModel imageModel;
+
+    @Inject
+    private Chatter chatter;
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -25,13 +28,19 @@ public class LLMResource {
         return "Hello from Quarkus REST for LLM";
     }
 
-    @GET
+    @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/image")
     @CustomSerialization(value = OpenAIImageSerialization.class)
-    public List<Image> images(@QueryParam("prompt") String prompt) {
-        List<Image> images = imageModel.generate(prompt, 1).content();
-        return images;
+    public List<Image> images(String message) {
+        return imageModel.generate(message, 1).content();
+    }
+
+    @POST
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/chat")
+    public String chat(String message) {
+        return chatter.chat(message);
     }
 
 }

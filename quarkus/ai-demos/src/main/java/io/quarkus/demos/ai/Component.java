@@ -16,25 +16,28 @@
  */
 package io.quarkus.demos.ai;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-
-import java.lang.reflect.Type;
-import java.util.function.BiFunction;
-
-
 /**
  * @author <a href="mailto:aoingl@gmail.com">Lin Gao</a>
- * <p>
- * {@link dev.langchain4j.data.image.Image} does not have getter methods, this is needed to serialize the Image to client.
  */
-public class OpenAIImageSerialization implements BiFunction<ObjectMapper, Type, ObjectWriter> {
+public class Component {
+    private String name;
+    private String version;
 
-    @Override
-    public ObjectWriter apply(ObjectMapper objectMapper, Type type) {
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        return objectMapper.writer();
+    public String getName() {
+        return name;
+    }
+
+    public Component setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public Component setVersion(String version) {
+        this.version = version;
+        return this;
     }
 }

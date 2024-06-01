@@ -16,19 +16,34 @@
  */
 package io.quarkus.demos.ai;
 
-import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
 import jakarta.inject.Singleton;
 
 /**
- * @author <a href="mailto:aoingl@gmail.com">Lin Gao</a>
+ * Each RegisterAiService represents a LLM provider and model-id.
+ * This represents a AiService with default model name.
+ * The provider is selected by the key <code>quarkus.langchain4j.chat-model.provider</code> in from application.properties.
  */
-@RegisterAiService()
+@RegisterAiService(chatMemoryProviderSupplier = ChatSession.MemorySupplier.class)
 @Singleton
 public interface Chatter {
 
-    @SystemMessage("As an assistance, don't speak nonsense words.")
-    @UserMessage("answer the question in brief way")
-    String ask(String question);
+    @UserMessage("""
+            Answer the question {question}
+            in one sentence
+            """)
+    String chat(String question);
+
+    /**
+     * Using a memoryId explicitly to support conversation context.
+     */
+    String conversation(@MemoryId Integer memoryId, String question);
+
+    /**
+     * Analyze the summary of a product, returns a Product Java POJO represents.
+     */
+    @UserMessage(fromResource = "product_summary.txt")
+    Product analyze(String summary);
 }

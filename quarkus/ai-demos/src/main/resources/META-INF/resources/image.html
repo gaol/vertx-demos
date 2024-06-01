@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Images with diffusion LLM in OpenAI style</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .image-container {
+            max-width: 800px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+        }
+        .image-container .messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .image-container .message {
+            margin-bottom: 10px;
+        }
+        .image-container .user-message {
+            text-align: right;
+        }
+        .image-container .bot-message {
+            text-align: left;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Generate Images with diffusion LLM</h1>
+
+<div class="image-container">
+    <ul class="messages"></ul>
+    <textarea id="user-input" placeholder="Tell LLM what image do you want to generate ..." cols="60"></textarea>
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    const apiUrl = 'http://localhost:8080/llm/image';
+
+    function displayMessage(message, sender) {
+        const messagesContainer = document.querySelector('.messages');
+        const messageElement = document.createElement('li');
+        messageElement.classList.add('message');
+        messageElement.classList.add(`${sender}-message`);
+        messageElement.innerText = message;
+        messagesContainer.appendChild(messageElement);
+    }
+
+    function displayImage(imgDatas) {
+        const messagesContainer = document.querySelector('.messages');
+        const messageElement = document.createElement('li');
+        messageElement.classList.add('message');
+        messageElement.classList.add('bot-message');
+        imgDatas.forEach(function(image) {
+            const imgElement = document.createElement('img');
+            imgElement.src = "data:image/png;base64, " + image['base64Data'];
+            messageElement.appendChild(imgElement);
+        });
+        messagesContainer.appendChild(messageElement);
+    }
+
+    function sendMessage() {
+        const userInput = document.getElementById('user-input').value;
+        if (!userInput.trim()) return;
+        displayMessage(userInput, 'user');
+        fetch(apiUrl, {
+            method: 'POST',
+            body: userInput
+        })
+            .then((response) => response.text())
+            .then(data => {
+                displayImage(JSON.parse(data));
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+                displayMessage('Error sending message. Please try again.' + error, 'bot');
+            });
+
+        document.getElementById('user-input').value = '';
+    }
+
+    document.getElementById('user-input').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            sendMessage();
+        }
+    });
+</script>
+</body>
+</html>

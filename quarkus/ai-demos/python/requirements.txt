@@ -1,0 +1,4 @@
+transformer
+diffusers
+flask
+torch
