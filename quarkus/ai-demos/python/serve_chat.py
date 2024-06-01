@@ -1,5 +1,7 @@
+from flask import Flask, request, jsonify
 import torch
 from transformers import pipeline
+import os
 
 app = Flask(__name__)
 http_port = os.environ.get('HTTP_PORT', 5000)
@@ -8,13 +10,13 @@ model_root_path = os.environ.get('LLM_ROOT_PATH', "c:\\ai\\models")
 llama3_path = f"{model_root_path}\\huggingface\\meta-llama"
 llama3_pipeline = pipeline("text-generation", model=llama3_path, model_kwargs={"torch_dtype": torch.bfloat16}, device="cuda")
 
-@app.route('/completions', methods=['POST'])
+@app.route('/chat/completions', methods=['POST'])
 def generate_text():
     try:
         # Get the input data from the request
         data = request.get_json()
         print(f"The whole request: {data}")
-        input_text = data.get('prompt', '')
+        input_text = data.get('messages', '')
         print(f"Going to generate answers for prompt: {input_text}")
         output_text = llama3_pipeline(input_text)
         print(f"Answer: {output_text}")

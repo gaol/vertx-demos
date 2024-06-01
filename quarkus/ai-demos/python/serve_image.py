@@ -3,7 +3,6 @@ from diffusers import StableDiffusionPipeline
 from torch import autocast
 import torch
 from io import BytesIO
-from PIL import Image
 import base64
 import os
 
