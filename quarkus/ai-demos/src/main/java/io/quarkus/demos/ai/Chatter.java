@@ -24,7 +24,7 @@ import jakarta.inject.Singleton;
 /**
  * Each RegisterAiService represents a LLM provider and model-id.
  * This represents a AiService with default model name.
- * The provider is selected by the key <code>quarkus.langchain4j.chat-model.provider</code> in from application.properties.
+ * The provider is selected by the key <code>quarkus.langchain4j.chat-model.provider</code> in application.properties.
  */
 @RegisterAiService(chatMemoryProviderSupplier = ChatSession.MemorySupplier.class)
 @Singleton
@@ -34,12 +34,12 @@ public interface Chatter {
             Answer the question {question}
             in one sentence
             """)
-    String chat(String question);
+    String ask(String question);
 
     /**
      * Using a memoryId explicitly to support conversation context.
      */
-    String conversation(@MemoryId Integer memoryId, String question);
+    String chat(@MemoryId String memoryId, @UserMessage String question);
 
     /**
      * Analyze the summary of a product, returns a Product Java POJO represents.

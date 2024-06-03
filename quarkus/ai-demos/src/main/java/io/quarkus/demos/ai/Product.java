@@ -52,4 +52,5 @@ public class Product {
         this.components = components;
         return this;
     }
+
 }

@@ -16,14 +16,16 @@
  */
 package io.quarkus.demos.ai;
 
-import io.quarkiverse.langchain4j.ModelName;
 import io.quarkiverse.langchain4j.RegisterAiService;
+import jakarta.inject.Singleton;
 
 /**
  * This represents to talk with a codellama LLM provided by a Ollama service.
+ * The configurations start with 'quarkus.langchain4j.ollama.codellama'
+ * The provide configuration is: 'quarkus.langchain4j.codellama.chat-model.provider=ollama'
  */
-@RegisterAiService
-@ModelName("code-llama")
+@RegisterAiService(modelName = "codellama")
+@Singleton
 public interface AskCodeLlama {
 
     String codeAssistant(String code);

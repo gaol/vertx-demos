@@ -3,12 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat with Ollama models</title>
+    <title>Ask questions to llama3 from Ollama</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+        }
+        h1 {
+          text-align:center;
+        }
+        .llm-info {
+            float: left;
+            margin: 2px 2px 2px 100px;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            padding: 10px;
         }
         .chat-container {
             max-width: 800px;
@@ -30,22 +40,34 @@
         }
         .chat-container .bot-message {
             text-align: left;
-            color: red;
+            color: green;
         }
     </style>
 </head>
 <body>
 
-<h1>Chat with Ollama models</h1>
+<h1>Ask questions to llama3 from Ollama</h1>
 
+<div class="llm-info">
+    <ul>
+        <li>LLM provider: ollama</li>
+        <li>LLM base-url: http://192.168.1.53:11434</li>
+        <li>LLM model id: llama3</li>
+        <li>Mode: stateless (do not remember)</li>
+    </ul>
+</div>
 <div class="chat-container">
     <ul class="messages"></ul>
-    <textarea id="user-input" placeholder="Tell LLM what you want to ask..." cols="60"></textarea>
-    <button onclick="sendMessage()">Send</button>
+    <div>
+        <textarea id="user-input" placeholder="Tell LLM what you want to ask..." cols="86"></textarea>
+    </div>
+    <div style="text-align: right; padding-right: 50px;">
+        <button onclick="sendMessage()">Send</button>
+    </div>
 </div>
 
 <script>
-    const apiUrl = '/llm/chat';
+    const apiUrl = '/llm/ask';
 
     function displayMessage(message, sender) {
         const messagesContainer = document.querySelector('.messages');

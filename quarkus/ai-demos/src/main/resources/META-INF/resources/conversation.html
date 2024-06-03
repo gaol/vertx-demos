@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generate Images with diffusion LLM in OpenAI style</title>
+    <title>Chat with Ollama models</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,25 +13,32 @@
         h1 {
           text-align:center;
         }
-        .image-container {
+        .llm-info {
+            float: left;
+            margin: 2px 2px 2px 100px;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .chat-container {
             max-width: 800px;
             margin: 20px auto;
             border: 1px solid #ccc;
             border-radius: 5px;
             padding: 20px;
         }
-        .image-container .messages {
+        .chat-container .messages {
             list-style-type: none;
             padding: 0;
             margin: 0;
         }
-        .image-container .message {
+        .chat-container .message {
             margin-bottom: 10px;
         }
-        .image-container .user-message {
+        .chat-container .user-message {
             text-align: right;
         }
-        .image-container .bot-message {
+        .chat-container .bot-message {
             text-align: left;
             color: green;
         }
@@ -39,12 +46,20 @@
 </head>
 <body>
 
-<h1>Generate Images with diffusion LLM</h1>
+<h1>Chat with Ollama models</h1>
 
-<div class="image-container">
+<div class="llm-info">
+    <ul>
+        <li>LLM provider: ollama</li>
+        <li>LLM base-url: http://192.168.1.53:11434</li>
+        <li>LLM model id: llama3</li>
+        <li>Mode: conversation</li>
+    </ul>
+</div>
+<div class="chat-container">
     <ul class="messages"></ul>
     <div>
-        <textarea id="user-input" placeholder="Tell LLM what image do you want to generate ..." cols="86"></textarea>
+        <textarea id="user-input" placeholder="Have a conversation with LLM..." cols="86"></textarea>
     </div>
     <div style="text-align: right; padding-right: 50px;">
         <button onclick="sendMessage()">Send</button>
@@ -52,7 +67,8 @@
 </div>
 
 <script>
-    const apiUrl = '/llm/image';
+    const apiUrl = '/llm/chat';
+    const session = 'dummy';
 
     function displayMessage(message, sender) {
         const messagesContainer = document.querySelector('.messages');
@@ -63,35 +79,28 @@
         messagesContainer.appendChild(messageElement);
     }
 
-    function displayImage(imgDatas) {
-        const messagesContainer = document.querySelector('.messages');
-        const messageElement = document.createElement('li');
-        messageElement.classList.add('message');
-        messageElement.classList.add('bot-message');
-        imgDatas.forEach(function(image) {
-            const imgElement = document.createElement('img');
-            imgElement.src = "data:image/png;base64, " + image['base64Data'];
-            messageElement.appendChild(imgElement);
-        });
-        messagesContainer.appendChild(messageElement);
-    }
-
     function sendMessage() {
         const userInput = document.getElementById('user-input').value;
         if (!userInput.trim()) return;
+
         displayMessage(userInput, 'user');
+
         fetch(apiUrl, {
             method: 'POST',
-            body: userInput
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message: userInput, session: session })
         })
-            .then((response) => response.text())
-            .then(data => {
-                displayImage(JSON.parse(data));
-            })
-            .catch(error => {
-                console.error('Error sending message:', error);
-                displayMessage('Error sending message. Please try again.' + error, 'bot');
-            });
+                .then(response => response.text())
+                .then(data => {
+                    console.error('data:', data);
+                    displayMessage(data, 'bot');
+                })
+                .catch(error => {
+                    console.error('Error sending message:', error);
+                    displayMessage('Error sending message. Please try again.' + error, 'bot');
+                });
 
         document.getElementById('user-input').value = '';
     }
