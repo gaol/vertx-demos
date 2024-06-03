@@ -13,6 +13,13 @@
         h1 {
           text-align:center;
         }
+        .llm-info {
+            float: left;
+            margin: 2px 2px 2px 100px;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            padding: 10px;
+        }
         .image-container {
             max-width: 800px;
             margin: 20px auto;
@@ -40,6 +47,15 @@
 <body>
 
 <h1>Generate Images with diffusion LLM</h1>
+
+<div class="llm-info">
+    <ul>
+        <li>LLM provider: openai</li>
+        <li>LLM base-url: http://192.168.1.23:5000</li>
+        <li>LLM model id: <a href="https://hf-mirror.com/runwayml/stable-diffusion-v1-5/tree/main">stable-diffusion-v1-5</a></li>
+        <li>Response-format: b64_json</li>
+    </ul>
+</div>
 
 <div class="image-container">
     <ul class="messages"></ul>
