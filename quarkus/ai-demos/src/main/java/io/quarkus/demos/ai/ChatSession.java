@@ -26,6 +26,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
+ * This is a ChatMemoryProvider implementation to support multiple conversations based on user's session.
+ *
  * @author <a href="mailto:aoingl@gmail.com">Lin Gao</a>
  */
 public class ChatSession implements ChatMemoryProvider {
