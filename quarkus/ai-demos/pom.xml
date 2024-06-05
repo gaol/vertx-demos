@@ -13,6 +13,7 @@
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
     <quarkus.platform.version>3.8.4</quarkus.platform.version>
+    <version.quarkus.langchain4j>0.15.1</version.quarkus.langchain4j>
     <skipITs>true</skipITs>
     <skipTests>true</skipTests>
     <surefire-plugin.version>3.2.5</surefire-plugin.version>
@@ -32,18 +33,23 @@
     <dependency>
       <groupId>io.quarkiverse.langchain4j</groupId>
       <artifactId>quarkus-langchain4j-ollama</artifactId>
-      <version>0.12.1</version>
+      <version>${version.quarkus.langchain4j}</version>
     </dependency>
     <dependency>
       <groupId>io.quarkiverse.langchain4j</groupId>
       <artifactId>quarkus-langchain4j-openai</artifactId>
-      <version>0.12.1</version>
+      <version>${version.quarkus.langchain4j}</version>
     </dependency>
     <dependency>
-      <groupId>dev.langchain4j</groupId>
-      <artifactId>langchain4j-core</artifactId>
-      <version>0.30.0</version>
+      <groupId>io.quarkiverse.langchain4j</groupId>
+      <artifactId>quarkus-langchain4j-redis</artifactId>
+      <version>${version.quarkus.langchain4j}</version>
     </dependency>
+<!--    <dependency>-->
+<!--      <groupId>dev.langchain4j</groupId>-->
+<!--      <artifactId>langchain4j-core</artifactId>-->
+<!--      <version>0.30.0</version>-->
+<!--    </dependency>-->
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy-reactive</artifactId>
