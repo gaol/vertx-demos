@@ -45,11 +45,6 @@
       <artifactId>quarkus-langchain4j-redis</artifactId>
       <version>${version.quarkus.langchain4j}</version>
     </dependency>
-<!--    <dependency>-->
-<!--      <groupId>dev.langchain4j</groupId>-->
-<!--      <artifactId>langchain4j-core</artifactId>-->
-<!--      <version>0.30.0</version>-->
-<!--    </dependency>-->
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy-reactive</artifactId>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ask CVE information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+          text-align:center;
+        }
+        .llm-info {
+            float: left;
+            margin: 2px 2px 2px 100px;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .chat-container {
+            max-width: 800px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+        }
+        .chat-container .messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .chat-container .message {
+            margin-bottom: 10px;
+        }
+        .chat-container .user-message {
+            text-align: right;
+        }
+        .chat-container .bot-message {
+            text-align: left;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Ask CVE information</h1>
+
+<div class="llm-info">
+    <ul>
+        <li>LLM provider: ollama</li>
+        <li>LLM base-url: http://192.168.1.53:11434</li>
+        <li>LLM model id: llama3</li>
+        <li>Embedding model: mxbai-embed-large</li>
+        <li>Embedding Store: redis://localhost:6379</li>
+    </ul>
+</div>
+<div class="chat-container">
+    <ul class="messages"></ul>
+    <div>
+        <textarea id="user-input" placeholder="CVE number like: CVE-2024-28752" cols="40"></textarea>
+    </div>
+    <div>
+        <button onclick="sendMessage('info')">Send without RAG</button>
+        <button onclick="sendMessage('infoPro')">Send with RAG</button>
+    </div>
+</div>
+
+<script>
+    const apiUrl = '/cve/';
+
+    function displayMessage(message, sender) {
+        const messagesContainer = document.querySelector('.messages');
+        const messageElement = document.createElement('li');
+        messageElement.classList.add('message');
+        messageElement.classList.add(`${sender}-message`);
+        messageElement.innerText = message;
+        messagesContainer.appendChild(messageElement);
+    }
+
+    function sendMessage(path) {
+        const userInput = document.getElementById('user-input').value;
+        if (!userInput.trim()) return;
+
+        displayMessage(userInput, 'user');
+
+        fetch(apiUrl + path, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: userInput
+        })
+                .then(response => response.text())
+                .then(data => {
+                    console.error('data:', data);
+                    displayMessage(data, 'bot');
+                })
+                .catch(error => {
+                    console.error('Error sending message:', error);
+                    displayMessage('Error sending message. Please try again.' + error, 'bot');
+                });
+
+        document.getElementById('user-input').value = '';
+    }
+
+    document.getElementById('user-input').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            sendMessage();
+        }
+    });
+</script>
+</body>
+</html>

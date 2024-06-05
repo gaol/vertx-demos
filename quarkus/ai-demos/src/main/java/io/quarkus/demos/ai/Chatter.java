@@ -17,6 +17,7 @@
 package io.quarkus.demos.ai;
 
 import dev.langchain4j.service.MemoryId;
+import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
 import jakarta.inject.Singleton;
@@ -35,6 +36,18 @@ public interface Chatter {
             in one sentence
             """)
     String ask(String question);
+
+    @SystemMessage("""
+            You are a security administrator of JBoss Enterprise Application Server (EAP or JBEAP).
+            Search the internet about the CVE: {cve}, Check if it affects EAP and which version of EAP it affects.
+            """)
+    @UserMessage("""
+            List CVE information of {cve} in a bulletin format, fields are: CVE Identifier, Severity, Summary, If EAP Effected,
+            The affected package name, The affected package version, The github repository of the package, Commit to fix the issue
+            You may need to analyze by accessing https://cveawg.mitre.org/api/cve/{cve} and https://bugzilla.redhat.com/show_bug.cgi?ctype=xml&id={cve}.
+            Keep the answer brief.
+            """)
+    String cveInfo(String cve);
 
     /**
      * Using a memoryId explicitly to support conversation context.
