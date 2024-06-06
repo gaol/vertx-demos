@@ -16,5 +16,5 @@ You can run your application in dev mode that enables live coding using:
 
 ## Start redis for embedding store
 
-> docker run --rm -d --name redis-stack -v $(pwd)/local-data/:/data -p 6379:6379 -p 8001:8001 -e REDIS_ARGS="--requirepass mypassword" redis/redis-stack:7.2.0-v10-x86_64
+> docker run --rm -d --name redis-stack -v $(pwd)/local-data/:/data -p 6379:6379 redis/redis-stack:7.2.0-v10-x86_64
 

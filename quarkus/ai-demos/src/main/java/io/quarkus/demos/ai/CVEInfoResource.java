@@ -32,14 +32,22 @@ import jakarta.ws.rs.core.MediaType;
 public class CVEInfoResource {
 
     @Inject
-    private CVEInfoService cveInfoService;
+    private CVEInfoPrepareService cveInfoPrepareService;
 
+    @Inject
+    private Chatter chatter;
+
+    @Inject
+    private CVERagAiService cveRagAiService;
+
+    // This should be requested on demand, run the following before request:
+    // docker run --rm -d --name redis-stack -v $(pwd)/local-data/:/data -p 6379:6379 redis/redis-stack:7.2.0-v10-x86_64
     @PUT
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/prepare")
     public String prepare() {
         System.out.println("\nStart to prepare the embedding store to redis\n");
-        cveInfoService.prepare();
+        cveInfoPrepareService.prepare();
         System.out.println("\nredis store prepared !\n");
         return "Done";
     }
@@ -49,7 +57,7 @@ public class CVEInfoResource {
     @Path("/info")
     public String cveInfo(String cve) {
         System.out.println("\nUser is asking information about CVE: " + cve + "\n");
-        return cveInfoService.cveInfo(cve);
+        return chatter.cveInfo(cve);
     }
 
     @POST
@@ -57,6 +65,6 @@ public class CVEInfoResource {
     @Path("/infoPro")
     public String cveInfoPro(String cve) {
         System.out.println("\nUser is asking information about CVE(Pro): " + cve + "\n");
-        return cveInfoService.cveInfoPro(cve);
+        return cveRagAiService.cveInfoPro(cve);
     }
 }

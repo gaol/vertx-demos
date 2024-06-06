@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ask CVE information</title>
+    <title>Ask CVE information (RAG)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -46,7 +46,7 @@
 </head>
 <body>
 
-<h1>Ask CVE information</h1>
+<h1>Ask CVE information (RAG)</h1>
 
 <div class="llm-info">
     <ul>
@@ -96,7 +96,11 @@
                 .then(response => response.text())
                 .then(data => {
                     console.error('data:', data);
-                    displayMessage(data, 'bot');
+                    if (path === 'info') {
+                       displayMessage("Without RAG: \n====\n" + data, 'bot');
+                    } else {
+                       displayMessage("With RAG: \n====\n" + data, 'bot');
+                    }
                 })
                 .catch(error => {
                     console.error('Error sending message:', error);

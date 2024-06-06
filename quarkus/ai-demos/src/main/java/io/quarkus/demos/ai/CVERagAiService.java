@@ -16,30 +16,20 @@
  */
 package io.quarkus.demos.ai;
 
-import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
 import jakarta.inject.Singleton;
 
 /**
- * Each RegisterAiService represents a LLM provider and model-id.
- * This represents a AiService with default model name.
- * The provider is selected by the key <code>quarkus.langchain4j.chat-model.provider</code> in application.properties.
+ * @author <a href="mailto:aoingl@gmail.com">Lin Gao</a>
  */
-@RegisterAiService(chatMemoryProviderSupplier = ChatSession.MemorySupplier.class)
+@RegisterAiService(retrievalAugmentor = CSVFileArgumentor.class)
 @Singleton
-public interface Chatter {
-
-    @UserMessage("""
-            Answer the question {question}
-            in one sentence
-            """)
-    String ask(String question);
-
+public interface CVERagAiService {
     @SystemMessage("""
             You are a security administrator of JBoss Enterprise Application Server (EAP or JBEAP).
-            Search the internet about the CVE: {cve}, Check if it affects EAP and which version of EAP it affects.
+            Search the internet about the CVE, according to current context, check if it affects EAP and which version of EAP it affects.
             Check the affected package and in which commit it gets fixed.
             If trackers or RHSA URLs are provided, you can access them for more information.
             """)
@@ -48,16 +38,5 @@ public interface Chatter {
             The affected package name, The affected package version, The github repository of the package, Commit to fix the issue
             You need to analyze by accessing https://access.redhat.com/api/v2/security/cve/{cve}
             """)
-    String cveInfo(String cve);
-
-    /**
-     * Using a memoryId explicitly to support conversation context.
-     */
-    String chat(@MemoryId String memoryId, @UserMessage String question);
-
-    /**
-     * Analyze the summary of a product, returns a Product Java POJO represents.
-     */
-    @UserMessage(fromResource = "product_summary.txt")
-    Product analyze(String summary);
+    String cveInfoPro(String cve);
 }

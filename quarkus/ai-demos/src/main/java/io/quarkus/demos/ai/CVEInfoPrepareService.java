@@ -26,17 +26,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static dev.langchain4j.data.document.splitter.DocumentSplitters.recursive;
 
 /**
  * @author <a href="mailto:aoingl@gmail.com">Lin Gao</a>
  */
 @ApplicationScoped
-public class CVEInfoService {
+public class CVEInfoPrepareService {
 
-    @ConfigProperty(name = "cve.info.file", defaultValue = "/home/lgao/workspace/eap7.1/eap7_3_cols_jbeaps.csv")
+    @ConfigProperty(name = "cve.info.file")
     private String cveInfoFile;
 
     @Inject
@@ -45,18 +43,6 @@ public class CVEInfoService {
     @Inject
     EmbeddingModel embeddingModel;
 
-    @Inject
-    Chatter chatter;
-
-    String cveInfo(String cve) {
-        return chatter.cveInfo(cve);
-    }
-
-    String cveInfoPro(String cve) {
-        return chatter.cveInfo(cve);
-    }
-
-
     public synchronized void prepare() {
         Document cveDoc = FileSystemDocumentLoader.loadDocument(cveInfoFile, new TextDocumentParser());
         EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
@@ -64,7 +50,8 @@ public class CVEInfoService {
                 .embeddingModel(embeddingModel)
                 .documentSplitter(recursive(500, 0))
                 .build();
-        // Warning - this can take a long time...
+        System.out.println("Start to ingest cveDoc to the store ...");
         ingestor.ingest(cveDoc);
+        System.out.println("Finished ingesting cveDoc to the store!");
     }
 }
