@@ -37,6 +37,18 @@ public interface Chatter {
             """)
     String ask(String question);
 
+    /**
+     * Using a memoryId explicitly to support conversation context.
+     */
+    String chat(@MemoryId String memoryId, @UserMessage String question);
+
+    /**
+     * Analyze the summary of a product, returns a Product Java POJO represents.
+     */
+    @UserMessage(fromResource = "product_summary.txt")
+    Product analyze(String summary);
+
+
     @SystemMessage("""
             You are a security administrator of JBoss Enterprise Application Server (EAP or JBEAP).
             Search the internet about the CVE: {cve}, Check if it affects EAP and which version of EAP it affects.
@@ -50,14 +62,4 @@ public interface Chatter {
             """)
     String cveInfo(String cve);
 
-    /**
-     * Using a memoryId explicitly to support conversation context.
-     */
-    String chat(@MemoryId String memoryId, @UserMessage String question);
-
-    /**
-     * Analyze the summary of a product, returns a Product Java POJO represents.
-     */
-    @UserMessage(fromResource = "product_summary.txt")
-    Product analyze(String summary);
 }
