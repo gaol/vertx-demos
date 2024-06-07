@@ -21,8 +21,8 @@
             padding: 10px;
         }
         .chat-container {
-            max-width: 800px;
-            margin: 20px auto;
+            max-width: 1080px;
+            margin: 20px 20px 50px auto;
             border: 1px solid #ccc;
             border-radius: 5px;
             padding: 20px;
@@ -46,16 +46,18 @@
 </head>
 <body>
 
-<h1>Ask CVE information (RAG)</h1>
+<h1>Ask CVE information - Retrieval Augmented Generation (RAG) </h1>
 
 <div class="llm-info">
     <ul>
         <li>LLM provider: ollama</li>
         <li>LLM base-url: http://192.168.1.53:11434</li>
         <li>LLM model id: llama3</li>
-        <li>Embedding model: mxbai-embed-large</li>
-        <li>Embedding Store: redis://localhost:6379</li>
+<!--        <li>Embedding model: mxbai-embed-large</li>-->
+<!--        <li>Embedding Store: redis://localhost:6379</li>-->
+        <li></li>
     </ul>
+    <img src="rag.png" width="512" height="512" />
 </div>
 <div class="chat-container">
     <ul class="messages"></ul>

@@ -53,12 +53,10 @@ public interface Chatter {
             You are a security administrator of JBoss Enterprise Application Server (EAP or JBEAP).
             Search the internet about the CVE: {cve}, Check if it affects EAP and which version of EAP it affects.
             Check the affected package and in which commit it gets fixed.
-            If trackers or RHSA URLs are provided, you can access them for more information.
             """)
     @UserMessage("""
             Display CVE information of {cve} in a bulletin format, fields are: CVE Identifier, Severity, Summary, If EAP Effected,
-            The affected package name, The affected package version, The github repository of the package, Commit to fix the issue
-            You need to analyze by accessing https://access.redhat.com/api/v2/security/cve/{cve}
+            The affected package name, The affected package version, The github repository of the package, Commit to fix the issue.
             """)
     String cveInfo(String cve);
 
