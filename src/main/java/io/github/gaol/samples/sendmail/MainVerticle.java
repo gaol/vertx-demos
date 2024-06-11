@@ -13,28 +13,32 @@ import io.vertx.ext.web.RoutingContext;
 
 import java.util.concurrent.CountDownLatch;
 
-
 public class MainVerticle extends AbstractVerticle {
   private final static Logger logger = LoggerFactory.getLogger("MainVerticle");
-  private Router router;
+
+//    static {
+//      System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.Log4j2LogDelegateFactory");
+//    }
+
+    private Router router;
   private MailClientVerticle mailClientVerticle;
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
     router = Router.router(vertx);
     router.route("/sendmail").handler(this::sendmail);
     mailClientVerticle = new MailClientVerticle();
-    vertx.deployVerticle(SendMailVerticle.class, new DeploymentOptions().setInstances(8), did -> {
+    vertx.deployVerticle(SendMailVerticle.class, new DeploymentOptions().setInstances(8)).onComplete(did -> {
       if (did.succeeded()) {
         vertx.createHttpServer()
-          .requestHandler(router)
-          .listen(8888, http -> {
-            if (http.succeeded()) {
-              startPromise.complete();
-              logger.info("HTTP server started on port 8888");
-            } else {
-              startPromise.fail(http.cause());
-            }
-          })
+                .requestHandler(router)
+                .listen(8888).onComplete(http -> {
+                  if (http.succeeded()) {
+                    startPromise.complete();
+                    logger.info("HTTP server started on port 8888");
+                  } else {
+                    startPromise.fail(http.cause());
+                  }
+                })
         ;
       } else {
         startPromise.fail(did.cause());
@@ -88,12 +92,11 @@ public class MainVerticle extends AbstractVerticle {
 
   public static void main(String[] args) {
     Vertx vertx = Vertx.vertx();
-    System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.Log4j2LogDelegateFactory");
     vertx.deployVerticle(new MainVerticle());
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
       CountDownLatch latch = new CountDownLatch(1);
       System.out.println("Going to call vertx.close");
-      vertx.close(v -> {
+      vertx.close().onComplete(v -> {
         latch.countDown();
         System.out.println("Vertx closed !!");
       });

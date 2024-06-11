@@ -15,45 +15,66 @@
   <packaging>jar</packaging>
 
   <properties>
-    <vertx.version>4.3.6</vertx.version>
-    <vertx-maven-plugin.version>1.0.18</vertx-maven-plugin.version>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <exec-maven-plugin.version>1.5.0</exec-maven-plugin.version>
-    <log4j2.version>2.19.0</log4j2.version>
-    <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
+    <vertx.version>5.0.0-SNAPSHOT</vertx.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+    <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
+    <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+    <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
+
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <log4j2.version>2.20.0</log4j2.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-stack-depchain</artifactId>
+        <version>${vertx.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-mail-client</artifactId>
-        <version>${vertx.version}</version>
     </dependency>
   <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
-      <version>${vertx.version}</version>
   </dependency>
-      <dependency>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-api</artifactId>
-          <version>${log4j2.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-core</artifactId>
-          <version>${log4j2.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-slf4j-impl</artifactId>
-          <version>${log4j2.version}</version>
-      </dependency>
+<!--      <dependency>-->
+<!--          <groupId>org.apache.logging.log4j</groupId>-->
+<!--          <artifactId>log4j-api</artifactId>-->
+<!--          <version>${log4j2.version}</version>-->
+<!--      </dependency>-->
+<!--      <dependency>-->
+<!--          <groupId>org.apache.logging.log4j</groupId>-->
+<!--          <artifactId>log4j-core</artifactId>-->
+<!--          <version>${log4j2.version}</version>-->
+<!--      </dependency>-->
+<!--      <dependency>-->
+<!--          <groupId>org.apache.logging.log4j</groupId>-->
+<!--          <artifactId>log4j-slf4j-impl</artifactId>-->
+<!--          <version>${log4j2.version}</version>-->
+<!--      </dependency>-->
   </dependencies>
 
     <build>
         <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <release>11</release>
+        </configuration>
+      </plugin>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>${maven-shade-plugin.version}</version>

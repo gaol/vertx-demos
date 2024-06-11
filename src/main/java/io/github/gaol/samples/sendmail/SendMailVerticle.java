@@ -2,7 +2,6 @@ package io.github.gaol.samples.sendmail;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
@@ -11,7 +10,9 @@ import io.vertx.ext.mail.MailConfig;
 import io.vertx.ext.mail.MailMessage;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -51,16 +52,19 @@ public class SendMailVerticle extends AbstractVerticle {
         total.set(Integer.parseInt(body.getString("total", "1")));
       } catch (NumberFormatException ignored) {
       }
+      List<String> toList = new ArrayList<>();
+      toList.add("testa@localtest.tld (test Ä name in localtest ltd)");
+      toList.add("testb@localtest.tld (test b Ä name in localtest ltd)");
       MailMessage message = new MailMessage();
       message
         .setText(body.getString("content", "text email body"))
         .setFrom("testa@localtest.tld")
-        .setTo("testb@localtest.tld")
-      .setSubject(body.getString("subject", "test email subject"))
+        .setTo(toList)
+        .setSubject(body.getString("subject", "test email subject which has a long subject line, it may exceeds the max length limitation from mail vendor."))
       ;
       final Thread t1 = Thread.currentThread();
 //      logger.info("Current Context outside of mailClient.sentMail(): " + Vertx.currentContext());
-      mailClient.sendMail(message, r -> {
+      mailClient.sendMail(message).onComplete(r -> {
 //        logger.info("Current Context inside of mailClient.sentMail(): " + Vertx.currentContext());
         Thread t2 = Thread.currentThread();
 //        logger.info("t1: " + t1 + ", t2: " + t2);
