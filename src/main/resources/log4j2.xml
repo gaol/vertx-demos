@@ -27,8 +27,8 @@
     <Logger name="sun.reflect" level="error" additivity="false">
       <AppenderRef ref="STDOUT" level="error" />
     </Logger>
-    <Logger name="io.vertx" level="debug" additivity="false">
-      <AppenderRef ref="STDOUT" level="info" />
+    <Logger name="io.vertx" level="trace" additivity="false">
+      <AppenderRef ref="STDOUT" level="trace" />
     </Logger>
     <Root level="debug" additivity="false">
       <AppenderRef ref="STDOUT" />

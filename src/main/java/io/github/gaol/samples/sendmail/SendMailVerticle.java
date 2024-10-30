@@ -2,8 +2,8 @@ package io.github.gaol.samples.sendmail;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.internal.logging.Logger;
+import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mail.MailClient;
 import io.vertx.ext.mail.MailConfig;
@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -37,7 +38,9 @@ public class SendMailVerticle extends AbstractVerticle {
     i = ++idx;
     MailConfig mailConfig = new MailConfig()
       .setPort(9025)
-      .setMaxPoolSize(10)
+      .setMaxPoolSize(1)// only 1 connection
+      .setKeepAlive(true).setKeepAliveTimeoutUnit(TimeUnit.SECONDS).setKeepAliveTimeout(60)// 1 minute
+      .setPoolCleanerPeriodUnit(TimeUnit.SECONDS).setPoolCleanerPeriod(5) // 5 seconds to clean pool
       .setHostname("127.0.0.1")
       .setUsername("testa@localtest.tld")
       //.setUsername("testa")

@@ -1,8 +1,8 @@
 package io.github.gaol.samples.sendmail;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.internal.logging.Logger;
+import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.ext.mail.MailClient;
 import io.vertx.ext.mail.MailConfig;
 
